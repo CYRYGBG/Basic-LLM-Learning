@@ -7,3 +7,5 @@
 ## 学习历程更新
 
 [LLM基础学习01：LLM解码策略和显存占用计算](https://zhuanlan.zhihu.com/p/21348048780)
+
+[LLM基础学习02：分布式训练核心架构与多级并行策略详解——DDP/FSDP/ZeRO实战代码、显存优化方案及技术资源全景索引](https://zhuanlan.zhihu.com/p/21784954155)
