@@ -1,0 +1,17 @@
+{
+    "train_batch_size": 64,
+    "gradient_accumulation_steps": 1,
+    "fp16": {
+      "enabled": false
+    },
+    "zero_allow_untested_optimizer": true,
+    "zero_optimization": {
+      "stage": 2,
+      "allgather_partitions": true,
+      "allgather_bucket_size": 200000000,
+      "overlap_comm": true,
+      "reduce_scatter": true,
+      "reduce_bucket_size": 200000000,
+      "contiguous_gradients": true
+    }
+  }
