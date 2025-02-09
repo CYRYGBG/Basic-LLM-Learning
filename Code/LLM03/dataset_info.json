@@ -1,0 +1,19 @@
+{
+  "gsm8k_math_train": {
+    "file_name": "gsm8k-train.arrow",
+    "formatting": "alpaca",
+    "columns": {
+      "query": "question",
+      "response": "answer"
+    }
+  },
+  
+  "gsm8k_math_test": {
+    "file_name": "gsm8k-test.arrow",
+    "formatting": "alpaca",
+    "columns": {
+      "query": "question",
+      "response": "answer"
+    }
+  }
+}
