@@ -142,12 +142,14 @@ lm_eval --model hf --model_args pretrained="/root/autodl-tmp/model/Qwen2.5-1.5B"
 accelerate launch -m lm_eval --model hf --model_args pretrained="/root/autodl-tmp/model/Qwen2.5-1.5B" --tasks gsm8k --batch_size auto --output_path ./eval_results
 ```
 
-测试完之后可以得到以下结果，可以看到这个base model的能力还是挺强的（n-shot为5表示了每道题会提供5个例题，flexible-extract表示从输出中灵活提取数字答案，strict-match表示必须严格匹配答案格式）。
+测试完之后可以得到以下结果，可以看到这个base model的能力还是挺菜的（n-shot为5表示了每道题会提供5个例题，flexible-extract表示从输出中灵活提取数字答案，strict-match表示必须严格匹配答案格式）。
 
 | Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
 | ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
 | gsm8k |       3 | flexible-extract |      5 | exact_match | ↑    | 0.6224 | ±    | 0.0134 |
 |       |         | strict-match     |      5 | exact_match | ↑    | 0.6179 | ±    | 0.0134 |
+| gsm8k |       3 | flexible-extract |      1 | exact_match | ↑    | 0.2123 | ±    | 0.0113 |
+|       |         | trict-match      |      1 | exact_match | ↑    | 0.0045 | ±    | 0.0019 |
 
 ## 本地数据集
 
