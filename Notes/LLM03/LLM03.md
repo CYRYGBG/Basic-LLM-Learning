@@ -260,10 +260,3 @@ lm_eval --model hf --model_args pretrained="D:\04.Code\model\Qwen2.5-1.5B-Instru
 | ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
 | gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.3806 | ±    | 0.0134 |
 |       |         | strict-match     |      0 | exact_match | ↑    | 0.4723 | ±    | 0.0138 |
-
-# 暂时
-
-| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
-| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
-| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.0902 | ±    | 0.0079 |
-|       |         | strict-match     |      0 | exact_match | ↑    | 0.0000 | ±    | 0.0000 |
