@@ -260,3 +260,21 @@ lm_eval --model hf --model_args pretrained="D:\04.Code\model\Qwen2.5-1.5B-Instru
 | ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
 | gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.3806 | ±    | 0.0134 |
 |       |         | strict-match     |      0 | exact_match | ↑    | 0.4723 | ±    | 0.0138 |
+
+## Base Model评估
+
+基于`Qwen2.5-1.5B`又进行了一次测试，效果比Instruct的还好，推测是base model中有相关的知识，但是Instruct之后破坏了这些知识，有点在训练集上过拟合的意思。
+
+训练前
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.0902 | ±    | 0.0079 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.0000 | ±    | 0.0000 |
+
+训练后：
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.5474 | ±    | 0.0137 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.5747 | ±    | 0.0136 |
