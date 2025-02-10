@@ -6,6 +6,8 @@
 
 [LLM基础学习02：分布式训练核心架构与多级并行策略详解——DDP/FSDP/ZeRO实战代码、显存优化方案及技术资源全景索引](https://zhuanlan.zhihu.com/p/21784954155)
 
+**本文的所有代码都放在了仓库[Basic-LLM-Learning](https://github.com/CYRYGBG/Basic-LLM-Learning/tree/master/Code/LLM03)中，欢迎star！！！**
+
 # 简介
 
 LLM的训练中大致可以分为六个任务：data preparation(数据准备), pre-training(预训练), fine-tuning(微调), instruction-tuning(指令调优), preference alignment(偏好对齐), and applications（下游应用）。关于数据准备和预训练阶段，通常需要进行大量的准备工作和充足的显卡资源，作者作为个人爱好学习者目前是接触不到的；而微调和指令微调的区别在于：**微调希望模型适应特定任务（比如分类，翻译等）通常是针对单一任务优化，而指令微调则希望模型可以理解并遵循自然语言表示的指令，可以完成多种任务**；偏好对齐则是训练模型使其生成更符合人类偏好的答案。
