@@ -1,11 +1,10 @@
-# TODO
+> 希望尽可能将自己学习过程中参考过的资料进行系统的整理，方便后面的初学者更快的找到自己想要的资料！
 
-- [x] 在gsm8k上不训练测试一次模型
-- [x] 查看peft怎么选取超参数以及lora的超参数是否能迁移到全参训练上
-- [x] 设置好autodl的训练环境并进行测试（捋清楚所有文件和流程）
-- [ ] 测试是否可以计算峰值显存
-- [ ] 使用Swift和llama factory分别训练一个模型，记录峰值显存和训练时间
-- [ ] 对比不同的分布式训练方法的峰值显存和训练时间（可选）
+**笔记持续更新中......**
+
+[LLM基础学习01：LLM解码策略和显存占用计算](https://zhuanlan.zhihu.com/p/21348048780)
+
+[LLM基础学习02：分布式训练核心架构与多级并行策略详解——DDP/FSDP/ZeRO实战代码、显存优化方案及技术资源全景索引](https://zhuanlan.zhihu.com/p/21784954155)
 
 # 简介
 
@@ -15,7 +14,7 @@ LLM的训练中大致可以分为六个任务：data preparation(数据准备), 
 
 # LLM数据集中的JSON
 
-更详细的介绍和**各种数据集的用途**可以依据[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html)的文档介绍，附上相关数据处理的链接：[数据集格式](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/data_preparation.html)。下面只对数据集中用到的相关语法进行介绍，主要参考资料是[菜鸟教程](https://www.runoob.com/json/json-syntax.html)。
+训练过程中数据集和数据集信息文件都会涉及到JSON文件，所以这里对用到的JSON的语法进行简要的记录，更详细的介绍和**各种数据集的用途**可以依据[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html)的文档介绍，附上相关数据处理的链接：[数据集格式](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/data_preparation.html)。下面只对数据集中用到的相关语法进行介绍，主要参考资料是[菜鸟教程](https://www.runoob.com/json/json-syntax.html)。
 
 JSON中的对象用 `{}`表示，具体应用类似于python中的字典（**一个对象中可以有多个键值对，数据由英文逗号进行分隔**），比如数据集中的一个样本就是一个对象，可以表示为：
 
@@ -50,7 +49,7 @@ JSON中的对象用 `{}`表示，具体应用类似于python中的字典（**一
 
 # 模型微调
 
-下面将分别使用[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html)https://swift.readthedocs.io/zh-cn/latest/index.html)作为微调框架，选取[Qwen/Qwen2.5-1.5B](https://huggingface.co/Qwen/Qwen2.5-1.5B)作为base model进行微调，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集。
+下面将分别使用[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html))作为微调框架，选取[Qwen/Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)作为base model进行微调，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集。
 
 ## 数据集介绍及下载
 
@@ -103,12 +102,16 @@ ds = load_dataset("openai/gsm8k", "main",cache_dir=cache_dir)
 
 ## 模型介绍及下载
 
-Qwen/Qwen2.5-1.5B是Qwen2.5系列中的一个参数比较小的decoder-only模型（从名字知道只有1.5B），可以在作者的笔记本上使用LoRA微调（8G显存），同时也是比较强的一个基础模型（可以在后面中不训练直接测试的结果看出）。
+[Qwen/Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)是Qwen2.5系列中的一个参数比较小的decoder-only模型（从名字知道只有1.5B），可以在作者的笔记本上使用LoRA微调（8G显存）。
 
-由于huggingface下载网络比较差，所以这里安装[ModelScoep](https://www.modelscope.cn/docs/intro/quickstart)下载，所以这里在命令行中使用命令
+这里提供两种下载方法，由于huggingface下载速度比较慢，所以推荐安装[ModelScope](https://www.modelscope.cn/docs/intro/quickstart)进行下载，所以这里在命令行中使用命令
 
 ```shell
-modelscope download --model Qwen/Qwen2.5-1.5B --local_dir your_path/Qwen2.5-1.5B
+modelscope download --model Qwen/Qwen2.5-1.5B-Instruct --local_dir your_path/Qwen2.5-1.5B-Instruct
+```
+
+```shell
+huggingface-cli download --resume-download Qwen/Qwen2.5-1.5B-Instruct --local-dir your_path/Qwen2.5-1.5B-Instruct
 ```
 
 下载模型权重到指定文件夹（特别指出，**官方的示例代码在cmd中运行会报错**，需要把单引号去掉才能运行成功！！！）
@@ -117,34 +120,31 @@ modelscope download --model Qwen/Qwen2.5-1.5B --local_dir your_path/Qwen2.5-1.5B
 
 ## LLaMA-Factory微调
 
-首先按照[LLaMA-Factory安装](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/installation.html#llama-factory)中的流程完成微调框架的安装，然后将**新建一个文件`llama_train.yaml`**并把下面的训练相关参数复制进去。然后就可以在该文件同一路径下或者指定绝对路径来使用命令进行模型训练了。
+首先按照[LLaMA-Factory安装](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/installation.html#llama-factory)中的流程完成微调框架的安装，然后将新建一个文件`llama_train.yaml`并把下面的训练相关参数复制进去。然后就可以在该文件同一路径下或者指定绝对路径来使用命令进行模型训练了。
 
 ```shell
-llamafactory-cli train .\llama_train_local.yaml     
+llamafactory-cli train llama_train.yaml     
 ```
 
-下面是具体的**训练参数配置文件内容**，需要把里面所有的文件路径设置为自己的文件路径。
+下面是具体的**训练参数配置文件内容**，需要把里面**所有的文件路径设置为自己的文件路径**（作者这里在AutoDL上租了一张4090进行学习，所以后面路径中出现的都是作者自己的文件路径，需要进行设置）。
 
 ```yaml
-# 本地训练测试
-
 # ------------------- 基础模型配置 -------------------
-model_name_or_path: D:\04.Code\model\Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
+model_name_or_path: /root/autodl-tmp/model/Qwen2.5-1.5B-Instruct  # 使用Qwen2.5-1.5B基座模型
 
 # ------------------- 训练阶段配置 -------------------
 stage: sft
 do_train: true
 report_to: tensorboard    # Tensorboard设置
-logging_dir: ./log_output
+logging_dir: ./log_output/qwen1.5b_instruct_gsm8k_full_llamafactory 
 finetuning_type: lora  # lora微调
 lora_target: all
 lora_rank: 16
 flash_attn: fa2
 
+
 # ------------------- 数据集配置 -------------------
-# 数据集配置
-# 数据集根目录（包含dataset_info.json）
-dataset_dir: D:\05.Dataset\openai___gsm8k\main\0.0.0\e53f048856ff4f594e959d75785d2c2d37b678ee 
+dataset_dir: /root/autodl-tmp/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee 
 dataset: gsm8k_math_train               # 对应JSON中定义的数据集名称
 max_samples: null  # null表示使用全部数据，如需部分调试可设为具体数值
 template: qwen  # 必须使用Qwen对应的模板格式
@@ -153,16 +153,16 @@ overwrite_cache: true  # 重新预处理数据时强制刷新缓存
 preprocessing_num_workers: 16  # 数据预处理并行进程数（根据CPU核数调整）
 
 # ------------------- 训练输出相关 -------------------
-output_dir: ./output/qwen1.5b_gsm8k_full_llamafactory  # 输出目录需要存在可写权限
+output_dir: ./output/qwen1.5b_instruct_gsm8k_lora_llamafactory  # 输出目录需要存在可写权限
 logging_steps: 10  # 每10步输出一次日志
-save_steps: 500  # 每500步保存一次检查点
+save_steps: 100  # 每500步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
-per_device_train_batch_size: 2  
+per_device_train_batch_size: 8  
 gradient_accumulation_steps: 4              # 梯度累积步数（等效总batch_size=2*4=8）
 learning_rate: 3.0e-5                       # 1.5B模型SFT建议学习率（高于7B但低于large模型）
-num_train_epochs: 5                         # GSM8K需更多epoch学习推理逻辑
+num_train_epochs: 6                         # GSM8K需更多epoch学习推理逻辑
 max_grad_norm: 0.5                          # 梯度裁剪阈值
 lr_scheduler_type: cosine                   
 warmup_ratio: 0.15                          # warmup阶段占训练总步数的比例
@@ -170,9 +170,9 @@ weight_decay: 0.05                          # 新增权重衰减，防止过拟�
 
 # ------------------- 验证与评估 -------------------
 val_size: 0.1  # 10%数据作为验证集
-per_device_eval_batch_size: 4  # 评估时batch_size可以更大
+per_device_eval_batch_size: 16  # 评估时batch_size可以更大
 eval_strategy: steps  # 按步数评估
-eval_steps: 200  # 每200步验证一次（GSM8K需要及时评估推理能力）
+eval_steps: 100  # 每200步验证一次（GSM8K需要及时评估推理能力）
 
 # ------------------- 显存优化 -------------------
 gradient_checkpointing: true  # 激活梯度检查点节省显存
@@ -183,16 +183,14 @@ optim: adamw_torch  # 推荐使用AdamW优化器
 可以使用`tensorboard`查看训练效果，根据上述文件配置的文件记录路径，可以使用以下命令：
 
 ```shell
- tensorboard --logdir="D:\06.学习资料\llm course\Basic-LLM-Learning\Code\LLM03\log_output\qwen1.5b_gsm8k_full_llamafactory_log" 
+tensorboard --port 6007 --logdir /root/autodl-tmp/llm03/log_output/qwen1.5b_instruct_gsm8k_full_llamafactory
 ```
 
-![image-20250210123222260](https://gitee.com/fbanhua/figurebed/raw/master/images/20250210123222348.png)
+![image-20250210205453623](https://gitee.com/fbanhua/figurebed/raw/master/images/20250210205453705.png)
 
+可以看到，大概在迭代600step后模型就会在训练集上过拟合（验证集损失明显上升），同时由于上面的训练命令中设置每200步保存一次模型参数，所以我们选取**过拟合前的模型参数**（即600step时保存的参数，具体保存参数的列表可以看下图）作为最终测试的参数。
 
-
-可以看到，大概在两轮训练之后模型就会在训练集上过拟合（验证集损失明显上升），所以现在将训练epoch设为2后进行最终的微调训练，得到如下训练记录。
-
-![image-20250210131208352](https://gitee.com/fbanhua/figurebed/raw/master/images/20250210131208431.png)
+![image-20250210205654816](https://gitee.com/fbanhua/figurebed/raw/master/images/20250210205654885.png)
 
 微调结束后，由于使用的是LoRA训练，所以需要**对模型参数进行合并导出**，根据[官方导出教程](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/merge_lora.html)，合并命令和配置文件`merge_config.yaml`如下：
 
@@ -202,50 +200,38 @@ llamafactory-cli export merge_config.yaml
 
 ```yaml
 ### model
-model_name_or_path: D:\04.Code\model\Qwen2.5-1.5B
-adapter_name_or_path: ./output/qwen1.5b_gsm8k_full_llamafactory
+### 选取eval loss最小的checkpoint进行合并
+model_name_or_path: /root/autodl-tmp/model/Qwen2.5-1.5B-Instruct
+adapter_name_or_path: /root/autodl-tmp/llm03/output/qwen1.5b_instruct_gsm8k_lora_llamafactory/checkpoint-600
 template: qwen
 finetuning_type: lora
 
 ### export
-export_dir: D:\04.Code\model\Qwen2.5-1.5B-lora-sft
-export_size: 2
+export_dir: /root/autodl-tmp/model/Qwen2.5-1.5B-Instruct-lora-sft
+export_size: 1
 export_device: cpu
 export_legacy_format: false
 ```
 
-
-
 # 模型评估
 
-## 评估工具及base model测试
+## 评估工具
 
-现在使用一个评估工具：[Language Model Evaluation Harness](https://github.com/EleutherAI/lm-evaluation-harness)来对模型的效果进行评价，有一个介绍的比较好的[教程](https://medium.com/@cch.chichieh/llm-%E8%A9%95%E4%BC%B0%E6%95%99%E5%AD%B8-eleutherai-lm-evaluation-harness-42628a4362f7#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImVlYzUzNGZhNWI4Y2FjYTIwMWNhOGQwZmY5NmI1NGM1NjIyMTBkMWUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDkwMDM0Mzg1OTIzNTMyMDQwOTUiLCJlbWFpbCI6ImZiYW5odWExMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYmYiOjE3MzkwMDkxNjIsIm5hbWUiOiJubiBubiIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMSUxuYXgwUS1Kd2NLVUstNlJNZnBwZ29yU1A0U19jdHFub08yWXRSRmtxV2ZVc0ZJPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Im5uIiwiZmFtaWx5X25hbWUiOiJubiIsImlhdCI6MTczOTAwOTQ2MiwiZXhwIjoxNzM5MDEzMDYyLCJqdGkiOiJhMWIwNzY3N2EwMWU2OTU3ZTE2MWVhMWE1NGUwOGE3ZjE3NmU0ZGYwIn0.oC9JTA1bLjqtrN9YV16Qt9w86OCCkAsWF84nW7O0cfTQ-lbv4OGj1SfXfsPRzHvaS5V4eNPL2_ZhL9VM6wPiXDwUpqcPXe7YAnSfugeJdaRDOlI8a6TbAhFsle2Qn3Dq9BdnD2aJERIe3rgbZ04Vb_uChI5AvRvsieKLOwpy_sHVxDbuViSkcOw-eM-aCDbM3CRHKwYqWA6WkF2GJG3-CCbzuKNadDJhfO0BPThZA7cqce7lXDq8olJADXVVL8Wv8T95FqEQZVBxcONhtSnMGzbPyFb-ksBudkS6LGREzhR1MGgHy8qDeKM8m-D1ZCkij7VJoq1XB4h8Vq5VzLn9MA)。使用下面的命令**对未经训练的模型进行一次测试**。
+现在使用一个评估工具：[Language Model Evaluation Harness](https://github.com/EleutherAI/lm-evaluation-harness)来对模型的效果进行评价，有一个介绍的比较好的[安装和使用教程](https://medium.com/@cch.chichieh/llm-%E8%A9%95%E4%BC%B0%E6%95%99%E5%AD%B8-eleutherai-lm-evaluation-harness-42628a4362f7#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImVlYzUzNGZhNWI4Y2FjYTIwMWNhOGQwZmY5NmI1NGM1NjIyMTBkMWUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyMTYyOTYwMzU4MzQtazFrNnFlMDYwczJ0cDJhMmphbTRsamRjbXMwMHN0dGcuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDkwMDM0Mzg1OTIzNTMyMDQwOTUiLCJlbWFpbCI6ImZiYW5odWExMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYmYiOjE3MzkwMDkxNjIsIm5hbWUiOiJubiBubiIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMSUxuYXgwUS1Kd2NLVUstNlJNZnBwZ29yU1A0U19jdHFub08yWXRSRmtxV2ZVc0ZJPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Im5uIiwiZmFtaWx5X25hbWUiOiJubiIsImlhdCI6MTczOTAwOTQ2MiwiZXhwIjoxNzM5MDEzMDYyLCJqdGkiOiJhMWIwNzY3N2EwMWU2OTU3ZTE2MWVhMWE1NGUwOGE3ZjE3NmU0ZGYwIn0.oC9JTA1bLjqtrN9YV16Qt9w86OCCkAsWF84nW7O0cfTQ-lbv4OGj1SfXfsPRzHvaS5V4eNPL2_ZhL9VM6wPiXDwUpqcPXe7YAnSfugeJdaRDOlI8a6TbAhFsle2Qn3Dq9BdnD2aJERIe3rgbZ04Vb_uChI5AvRvsieKLOwpy_sHVxDbuViSkcOw-eM-aCDbM3CRHKwYqWA6WkF2GJG3-CCbzuKNadDJhfO0BPThZA7cqce7lXDq8olJADXVVL8Wv8T95FqEQZVBxcONhtSnMGzbPyFb-ksBudkS6LGREzhR1MGgHy8qDeKM8m-D1ZCkij7VJoq1XB4h8Vq5VzLn9MA)。
 
-```shell
-lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8k --device cuda:0 --batch_size auto --output_path ./eval_results
-```
-
-也可以指定`num_fewshot`参数为每个问题**提供指定个数的示例**（可以理解为做题前可以查看例题的解题格式），相关的代码就是在最后指定相关参数：
+使用下面的命令**对指定路径下的模型权重文件进行一次测试**。
 
 ```shell
-lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8k --device cuda:0 --batch_size auto --output_path ./eval_results --num_fewshot 1
+lm_eval --model hf --model_args pretrained="/root/autodl-tmp/model/Qwen2.5-1.5B-Instruct" --tasks gsm8k --device cuda:0 --batch_size 8 --output_path ./eval_results --num_fewshot 0
 ```
+
+其中指定了`num_fewshot`参数为每个问题**提供指定个数的示例**（可以理解为做题前可以查看例题的解题格式，由于训练时模型是没有例题的，所以这里设置为0）。
 
 如果要**使用多卡进行评估**，则需要使用`accelerate launch`，具体的命令如下(该命令会在所有的可用GPU上进行推理)
 
 ```shell
-accelerate launch -m lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8k --batch_size auto --output_path ./eval_results
+accelerate launch -m lm_eval --model hf --model_args pretrained="/root/autodl-tmp/model/Qwen2.5-1.5B-Instruct" --tasks gsm8k --batch_size 8 --output_path ./eval_results --num_fewshot 0
 ```
-
-测试完之后可以得到以下结果，可以看到这个base model的能力还是挺菜的（n-shot为5表示了每道题会提供5个例题，flexible-extract表示从输出中灵活提取数字答案，strict-match表示必须严格匹配答案格式）。
-
-| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
-| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
-| gsm8k |       3 | flexible-extract |      5 | exact_match | ↑    | 0.6224 | ±    | 0.0134 |
-|       |         | strict-match     |      5 | exact_match | ↑    | 0.6179 | ±    | 0.0134 |
-| gsm8k |       3 | flexible-extract |      1 | exact_match | ↑    | 0.2123 | ±    | 0.0113 |
-|       |         | trict-match      |      1 | exact_match | ↑    | 0.0045 | ±    | 0.0019 |
 
 ## 本地数据集
 
@@ -253,9 +239,31 @@ accelerate launch -m lm_eval --model hf --model_args pretrained="your_path/Qwen2
 
 ![image-20250209131047499](https://gitee.com/fbanhua/figurebed/raw/master/images/20250209131047556.png)
 
-基于这个配置文件使用下面的命令进行了测试，是可以运行成功的。
+作者在自己电脑基于这个配置文件使用下面的命令进行了测试，是可以运行成功的。
 
 ```shell
-lm_eval --model hf --model_args pretrained="D:\04.Code\model\Qwen2.5-1.5B" --tasks gsm8k-local --device cuda:0 --batch_size 1 --output_path ./eval_results --trust_remote_code
+lm_eval --model hf --model_args pretrained="D:\04.Code\model\Qwen2.5-1.5B-Instruct" --tasks gsm8k-local --device cuda:0 --batch_size 1 --output_path ./eval_results --trust_remote_code
 ```
 
+## 评估结果
+
+首先使用**未经训练的模型进行评估**，测试完之后可以得到以下结果。可以看到，这个模型的能力还是挺菜的（n-shot为5表示了每道题会提供0个例题，flexible-extract表示从输出中灵活提取数字答案，strict-match表示必须严格匹配答案格式，可以看出模型的**规范输出能力很差**，但基本还是能得到一些正确结果）。
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.1494 | ±    | 0.0098 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.0000 | ±    | 0.0000 |
+
+下面是**微调后**的结果，可以看到微调对模型的提升是很大的，而且严格匹配答案格式，但是目前还没搞清楚为什么宽松模式的得分会比严格模式的低那么多。
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.3806 | ±    | 0.0134 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.4723 | ±    | 0.0138 |
+
+# 暂时
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.0902 | ±    | 0.0079 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.0000 | ±    | 0.0000 |

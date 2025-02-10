@@ -1,11 +1,11 @@
 # ------------------- 基础模型配置 -------------------
-model_name_or_path: /root/autodl-tmp/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
+model_name_or_path: /root/autodl-tmp/model/Qwen2.5-1.5B-Instruct  # 使用Qwen2.5-1.5B基座模型
 
 # ------------------- 训练阶段配置 -------------------
 stage: sft
 do_train: true
 report_to: tensorboard    # Tensorboard设置
-logging_dir: ./log_output
+logging_dir: ./log_output/qwen1.5b_instruct_gsm8k_full_llamafactory 
 finetuning_type: lora  # lora微调
 lora_target: all
 lora_rank: 16
@@ -22,7 +22,7 @@ overwrite_cache: true  # 重新预处理数据时强制刷新缓存
 preprocessing_num_workers: 16  # 数据预处理并行进程数（根据CPU核数调整）
 
 # ------------------- 训练输出相关 -------------------
-output_dir: ./output/qwen1.5b_gsm8k_full_llamafactory  # 输出目录需要存在可写权限
+output_dir: ./output/qwen1.5b_instruct_gsm8k_lora_llamafactory  # 输出目录需要存在可写权限
 logging_steps: 10  # 每10步输出一次日志
 save_steps: 500  # 每500步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
