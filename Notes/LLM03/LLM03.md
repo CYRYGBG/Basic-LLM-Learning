@@ -49,7 +49,7 @@ JSON中的对象用 `{}`表示，具体应用类似于python中的字典（**一
 
 # 模型微调
 
-下面将分别使用[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html))作为微调框架，选取[Qwen/Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)作为base model进行微调，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集。
+下面将使用[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/index.html)作为微调框架，选取[Qwen/Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)作为base model进行微调，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集。
 
 ## 数据集介绍及下载
 
