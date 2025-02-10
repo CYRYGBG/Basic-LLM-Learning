@@ -1,24 +1,25 @@
-# 以下是修改后的 qwen_gsm8k_sft.yaml 配置文件（Python YAML格式）
-
 # ------------------- 基础模型配置 -------------------
 model_name_or_path: /root/autodl-tmp/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
 
 # ------------------- 训练阶段配置 -------------------
 stage: sft
 do_train: true
-finetuning_type: full  # 全参训练
+report_to: tensorboard    # Tensorboard设置
+logging_dir: ./log_output
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 16
+flash_attn: fa2
+
 
 # ------------------- 数据集配置 -------------------
-# 数据集配置
-dataset_dir: .\      # 数据集根目录（必须包含dataset_info.json）
+dataset_dir: /root/autodl-tmp/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee 
 dataset: gsm8k_math_train               # 对应JSON中定义的数据集名称
-dataset_config: my_dataset_info.json # 显式指定配置文件
 max_samples: null  # null表示使用全部数据，如需部分调试可设为具体数值
-dataset_format: vanilla  # 假设数据格式为 {"question": "...", "answer": "..."}
 template: qwen  # 必须使用Qwen对应的模板格式
 cutoff_len: 1024  # 上下文最大长度（GSM8K数学题通常不超过此长度）
 overwrite_cache: true  # 重新预处理数据时强制刷新缓存
-preprocessing_num_workers: 8  # 数据预处理并行进程数（根据CPU核数调整）
+preprocessing_num_workers: 16  # 数据预处理并行进程数（根据CPU核数调整）
 
 # ------------------- 训练输出相关 -------------------
 output_dir: ./output/qwen1.5b_gsm8k_full_llamafactory  # 输出目录需要存在可写权限
@@ -27,18 +28,14 @@ save_steps: 500  # 每500步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
-per_device_train_batch_size: 2  # 单卡batch_size，1.5B模型建议显存8G+可设为2
-gradient_accumulation_steps: 4  # 梯度累积步数（等效总batch_size=2*4=8）
-learning_rate: 5.0e-5  # 1.5B模型SFT建议学习率（高于7B但低于large模型）
-num_train_epochs: 5  # GSM8K需更多epoch学习推理逻辑
-max_grad_norm: 1.0  # 梯度裁剪阈值
-lr_scheduler_type: cosine_with_restarts  # 带重启的余弦退火更适合数学推理
-warmup_ratio: 0.1  # warmup阶段占训练总步数的比例
-
-# ------------------- 硬件相关 -------------------
-fp16: false  # 开启混合精度训练（如果显卡支持V100+建议开启）
-bf16: false  # 如果使用A100/A800等卡可启用bf16（需硬件支持）
-deepspeed: null  # 单卡训练不需要deepseed
+per_device_train_batch_size: 2  
+gradient_accumulation_steps: 4              # 梯度累积步数（等效总batch_size=2*4=8）
+learning_rate: 3.0e-5                       # 1.5B模型SFT建议学习率（高于7B但低于large模型）
+num_train_epochs: 5                         # GSM8K需更多epoch学习推理逻辑
+max_grad_norm: 0.5                          # 梯度裁剪阈值
+lr_scheduler_type: cosine                   
+warmup_ratio: 0.15                          # warmup阶段占训练总步数的比例
+weight_decay: 0.05                          # 新增权重衰减，防止过拟合
 
 # ------------------- 验证与评估 -------------------
 val_size: 0.1  # 10%数据作为验证集
