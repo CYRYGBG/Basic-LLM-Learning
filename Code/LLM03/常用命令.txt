@@ -19,7 +19,7 @@ tensorboard --port 6007 --logdir /root/Basic-LLM-Learning/Code/LLM03/log_output/
 
 ----------------------评估----------------------
 lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8k --device cuda:0 --batch_size 1 --output_path ./eval_results
-
+accelerate launch -m lm_eval --model hf --model_args pretrained="/root/model/Qwen2.5-1.5B-lora8" --tasks gsm8k --batch_size 4 --output_path ./eval_results --num_fewshot 0
 
 
 ----------------------显存测试----------------------
