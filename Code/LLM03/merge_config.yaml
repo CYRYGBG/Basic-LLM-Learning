@@ -1,11 +1,11 @@
 ### model
-model_name_or_path: D:\04.Code\model\Qwen2.5-1.5B
-adapter_name_or_path: D:\06.学习资料\llm course\Basic-LLM-Learning\Code\LLM03\output\qwen1.5b_gsm8k_full_llamafactory
+model_name_or_path: /root/model/Qwen2.5-1.5B
+adapter_name_or_path: /root/Basic-LLM-Learning/Code/LLM03/output/lora8/checkpoint-1682
 template: qwen
 finetuning_type: lora
 
 ### export
-export_dir: D:\04.Code\model\Qwen2.5-1.5B-lora-sft
+export_dir: /root/model/Qwen2.5-1.5B-lora8
 export_size: 1
 export_device: cpu
 export_legacy_format: false

@@ -24,24 +24,24 @@ preprocessing_num_workers: 8
 # ------------------- 训练输出相关 -------------------
 output_dir: /root/Basic-LLM-Learning/Code/LLM03/output/lora8  
 logging_steps: 10  # 每10步输出一次日志
-save_steps: 300  # 每100步保存一次检查点
+save_steps: 200  # 每100步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
 per_device_train_batch_size: 2  
 gradient_accumulation_steps: 2             
-learning_rate: 3.0e-5                       
-num_train_epochs: 8                         
+learning_rate: 5.0e-5                       
+num_train_epochs: 2                         
 max_grad_norm: 0.5                          
 lr_scheduler_type: cosine                   
-warmup_ratio: 0.15                          
-weight_decay: 0.05                          
+warmup_ratio: 0.05                          
+weight_decay: 0.01                          
 
 # ------------------- 验证与评估 -------------------
 val_size: 0.1  # 10%数据作为验证集
 per_device_eval_batch_size: 4  
 eval_strategy: steps 
-eval_steps: 300  
+eval_steps: 200  
 
 # ------------------- 显存优化 -------------------
 gradient_checkpointing: true  
