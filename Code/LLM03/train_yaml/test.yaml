@@ -1,4 +1,6 @@
-# ./gpu_monitor.sh 0,1 FORCE_TORCHRUN=1 llamafactory-cli /root/Basic-LLM-Learning/Code/LLM03/train_yaml/test.yaml
+# ./gpu_monitor.sh 0,1 FORCE_TORCHRUN=1 llamafactory-cli train /root/Basic-LLM-Learning/Code/LLM03/train_yaml/test.yaml
+
+
 
 # ------------------- 基础模型配置 -------------------
 model_name_or_path: /root/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
