@@ -29,7 +29,7 @@ plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
 per_device_train_batch_size: 2  
-gradient_accumulation_steps: 2              
+gradient_accumulation_steps: 2             
 learning_rate: 3.0e-5                       
 num_train_epochs: 8                         
 max_grad_norm: 0.5                          
@@ -47,4 +47,3 @@ eval_steps: 100
 gradient_checkpointing: true  
 optim: adamw_torch  
 
-deepspeed: /root/Basic-LLM-Learning/Code/LLM03/LLaMA-Factory/examples/deepspeed/ds_z3_config.json
