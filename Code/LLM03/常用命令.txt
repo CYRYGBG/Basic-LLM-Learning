@@ -1,0 +1,27 @@
+----------------------常用路径----------------------
+----------------------本地----------------------
+D:\04.Code\model\Qwen2.5-1.5B
+D:\05.Dataset\openai___gsm8k\main\0.0.0\e53f048856ff4f594e959d75785d2c2d37b678ee
+----------------------AutoDL----------------------
+/root/autodl-tmp/model/Qwen2.5-1.5B
+/root/autodl-tmp/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee
+
+
+----------------------训练----------------------
+llamafactory-cli train llama_train.yaml   
+llamafactory-cli export merge_config.yaml
+
+
+----------------------tensorboard相关----------------------
+ps -ef | grep tensorboard | awk '{print $2}' | xargs kill -9
+tensorboard --port 6007 --logdir /root/autodl-tmp/llm03/log_output/qwen1.5b_instruct_gsm8k_full_llamafactory
+
+
+----------------------评估----------------------
+lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8k --device cuda:0 --batch_size 1 --output_path ./eval_results
+
+
+
+----------------------显存测试----------------------
+chmod +x gpu_monitor.sh
+./gpu_monitor.sh 0 llamafactory-cli train 显存计算测试.yaml 

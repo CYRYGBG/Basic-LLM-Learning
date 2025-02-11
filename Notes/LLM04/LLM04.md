@@ -10,6 +10,17 @@
 
 **本文的所有代码都放在了仓库[Basic-LLM-Learning](https://github.com/CYRYGBG/Basic-LLM-Learning)中，欢迎star！！！**
 
+# TODO
+
+- [x] 测试下现在的显存计算脚本能不能跑
+- [ ] 把所有模型的yaml文件放在一个文件夹里
+  - [ ] 做好文件命名
+  - [ ] 每个文件头标好运行命令
+
+- [ ] 找几篇综述，看下现在主要有哪些微调算法
+- [ ] 完成llama的所有算法的测试和时间计算
+- [ ] 完成Swift所有算法的测试和时间计算
+
 # 简介
 
 不同库之间支持的微调方法不同，本文主要依据[Swift](https://swift.readthedocs.io/zh-cn/stable/Instruction/%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0.html#tuner)和[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)进行学习和比较。
