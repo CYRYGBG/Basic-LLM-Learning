@@ -11,7 +11,7 @@ declare -a ENV_VARS=(
 declare -a TRAIN_COMMAND=(       # 要执行的训练命令（数组格式） 
     "llamafactory-cli"
     "train"
-    "/root/Basic-LLM-Learning/Code/LLM03/train_yaml/test.yaml"
+    "/root/Basic-LLM-Learning/Code/LLM03/train_yaml/full.yaml"
 )
 ##################################################
 
@@ -125,18 +125,18 @@ peak_total=$(cat "$PEAK_MEM_FILE" 2>/dev/null || echo 0)
     printf "| 运行时间     | %02d:%02d:%02d     |\\n" $((runtime/3600)) $((runtime%3600/60)) $((runtime%60))
     printf "| 峰值显存总和 | %'d MB       |\\n" "$peak_total"
 
-    echo -e "\n## 设备详情"
-    echo "| 设备ID | 显存使用    | 总显存      | 使用率  |"
-    echo "|--------|------------|------------|---------|"
-    while IFS=', ' read -r idx use total; do
-        (( total == 0 )) && continue
-        if [[ "$use" =~ ^[0-9]+$ ]]; then
-            pct=$(awk "BEGIN {printf \"%.1f\", $use*100/$total}")
-            printf "| %6d | %'8d MB | %'8d MB | %6.1f%% |\\n" "$idx" "$use" "$total" "$pct"
-        else
-            printf "| %6d | %8s MB | %'8d MB | %6s |\\n" "$idx" "N/A" "$total" "N/A"
-        fi
-    done < "$TEMP_DATA"
+    # echo -e "\n## 设备详情"
+    # echo "| 设备ID | 显存使用    | 总显存      | 使用率  |"
+    # echo "|--------|------------|------------|---------|"
+    # while IFS=', ' read -r idx use total; do
+    #     (( total == 0 )) && continue
+    #     if [[ "$use" =~ ^[0-9]+$ ]]; then
+    #         pct=$(awk "BEGIN {printf \"%.1f\", $use*100/$total}")
+    #         printf "| %6d | %'8d MB | %'8d MB | %6.1f%% |\\n" "$idx" "$use" "$total" "$pct"
+    #     else
+    #         printf "| %6d | %8s MB | %'8d MB | %6s |\\n" "$idx" "N/A" "$total" "N/A"
+    #     fi
+    # done < "$TEMP_DATA"
 
 } >| "$REPORT_FILE"
 
