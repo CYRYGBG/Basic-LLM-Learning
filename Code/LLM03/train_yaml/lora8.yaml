@@ -24,7 +24,7 @@ preprocessing_num_workers: 8
 # ------------------- 训练输出相关 -------------------
 output_dir: /root/Basic-LLM-Learning/Code/LLM03/output/lora8  
 logging_steps: 10  # 每10步输出一次日志
-save_steps: 100  # 每100步保存一次检查点
+save_steps: 300  # 每100步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
@@ -41,7 +41,7 @@ weight_decay: 0.05
 val_size: 0.1  # 10%数据作为验证集
 per_device_eval_batch_size: 4  
 eval_strategy: steps 
-eval_steps: 100  
+eval_steps: 300  
 
 # ------------------- 显存优化 -------------------
 gradient_checkpointing: true  

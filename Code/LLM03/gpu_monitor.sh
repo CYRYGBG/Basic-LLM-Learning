@@ -10,7 +10,7 @@ declare -a ENV_VARS=(             # 需要设置的环境变量（数组格式�
 declare -a TRAIN_COMMAND=(        # 要执行的训练命令（数组格式）
     "llamafactory-cli"
     "train"
-    "/root/Basic-LLM-Learning/Code/LLM03/train_yaml/test.yaml"
+    "/root/Basic-LLM-Learning/Code/LLM03/train_yaml/lora8.yaml"
 )
 ##################################################
 

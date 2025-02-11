@@ -25,3 +25,4 @@ lm_eval --model hf --model_args pretrained="your_path/Qwen2.5-1.5B" --tasks gsm8
 ----------------------显存测试----------------------
 chmod +x gpu_monitor.sh
 ./gpu_monitor.sh  
+watch -n 1 -c gpustat --color
