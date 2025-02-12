@@ -1,5 +1,5 @@
 ﻿# ------------------- 基础模型配置 -------------------
-model_name_or_path: /root/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
+model_name_or_path: D:/CYR_TMP/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
 
 # ------------------- 训练阶段配置 -------------------
 stage: sft
@@ -11,7 +11,7 @@ flash_attn: fa2
 
 
 # ------------------- 数据集配置 -------------------
-dataset_dir: /root/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee
+dataset_dir: D:/CYR_TMP/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee
 dataset: gsm8k_math_train               # 对应JSON中定义的数据集名称
 max_samples: 100  
 template: qwen  
@@ -20,9 +20,9 @@ overwrite_cache: true
 preprocessing_num_workers: 8  
 
 # ------------------- 训练输出相关 -------------------
-output_dir: /root/Basic-LLM-Learning/Code/LLM03/output/test  
+output_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/output/test 
 logging_steps: 10  # 每10步输出一次日志
-save_steps: 100  # 每100步保存一次检查点
+save_steps: 1000  # 每100步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
@@ -39,7 +39,7 @@ weight_decay: 0.05
 val_size: 0.1  # 10%数据作为验证集
 per_device_eval_batch_size: 4  
 eval_strategy: steps 
-eval_steps: 100  
+eval_steps: 10  
 
 # ------------------- 显存优化 -------------------
 gradient_checkpointing: true  

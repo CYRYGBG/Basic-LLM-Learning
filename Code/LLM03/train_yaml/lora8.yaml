@@ -28,7 +28,7 @@ save_steps: 200  # 每100步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
 
 # ------------------- 训练超参数 -------------------
-per_device_train_batch_size: 2  
+per_device_train_batch_size: 1  
 gradient_accumulation_steps: 2             
 learning_rate: 5.0e-5                       
 num_train_epochs: 2                         

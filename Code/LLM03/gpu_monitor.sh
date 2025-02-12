@@ -10,7 +10,7 @@ declare -a ENV_VARS=(             # 需要设置的环境变量（数组格式�
 declare -a TRAIN_COMMAND=(        # 要执行的训练命令（数组格式）
     "llamafactory-cli"
     "train"
-    "D:\\CYR_TMP\\Basic-LLM-Learning\\Code\\LLM03\\train_yaml\\lora8.yaml"
+    "D:\\CYR_TMP\\Basic-LLM-Learning\\Code\\LLM03\\train_yaml\\lora16.yaml"
 )
 ##################################################
 
@@ -139,7 +139,7 @@ for mem in "${peak_mem[@]}"; do
 done
 average_peak=$((num_gpus > 0 ? peak_total / num_gpus : 0))
 
-# 计算平均显存使用
+# 计算平均显存使用 (修正点：变量名错误修复)
 declare -A avg_mem=()
 total_avg=0
 total_count=0
@@ -153,10 +153,9 @@ for idx in "${!peak_mem[@]}"; do
             sum=$((sum + value))
             ((count++))
         done < "$log_file"
-        # avg=$(echo "scale=2; $sum / $count" | bc)
-        aavg=$(awk -v sum="$sum" -v count="$count" 'BEGIN{ printf "%.2f", (sum / count) }')
+        # 修正变量名错误：aavg -> avg
+        avg=$(awk -v sum="$sum" -v count="$count" 'BEGIN{ printf "%.2f", (sum / count) }')
         avg_mem["$idx"]=$avg
-        # total_avg=$(echo "$total_avg + $avg" | bc)
         total_avg=$(awk -v prev="$total_avg" -v curr="$avg" 'BEGIN{ printf "%.2f", (prev + curr) }')
         ((total_count++))
     else
@@ -167,11 +166,10 @@ done
 # 计算总平均值
 overall_avg=0
 if [[ $total_count -gt 0 ]]; then
-    # overall_avg=$(echo "scale=2; $total_avg / $total_count" | bc)
     overall_avg=$(awk -v total_avg="$total_avg" -v total_count="$total_count" '
                     BEGIN {
                         avg = (total_count != 0) ? total_avg / total_count : 0.00
-                        printf "%.2f\n", avg  # 严格保持与bc相同的小数精度
+                        printf "%.2f\n", avg
                     }')
 fi
 
