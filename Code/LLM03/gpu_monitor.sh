@@ -3,19 +3,19 @@
 # 使用方式：直接运行 ./gpu_monitor
 
 #################### 用户配置区 ####################
-DEVICES="0,1"                     # 需要使用的GPU设备ID（支持,和-格式）
+DEVICES="0"                     # 需要使用的GPU设备ID（支持,和-格式）
 declare -a ENV_VARS=(             # 需要设置的环境变量（数组格式）
-    "FORCE_TORCHRUN=1"
+    # "FORCE_TORCHRUN=1"
 )
 declare -a TRAIN_COMMAND=(        # 要执行的训练命令（数组格式）
     "llamafactory-cli"
     "train"
-    "/root/Basic-LLM-Learning/Code/LLM03/train_yaml/lora8.yaml"
+    "D:\\CYR_TMP\\Basic-LLM-Learning\\Code\\LLM03\\train_yaml\\lora8.yaml"
 )
 ##################################################
 
 ################### 初始化设置 ####################
-REPORT_DIR="/root/Basic-LLM-Learning/Code/LLM03/gpu_report"  # 报告存储目录
+REPORT_DIR="D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\gpu_report"  # 报告存储目录
 REPORT_FILE="${REPORT_DIR}/$(date +%Y%m%d_%H%M%S)_gpu_report.md"
 mkdir -p "$REPORT_DIR" || {
     echo "[错误] 无法创建报告目录: $REPORT_DIR" >&2
@@ -153,9 +153,11 @@ for idx in "${!peak_mem[@]}"; do
             sum=$((sum + value))
             ((count++))
         done < "$log_file"
-        avg=$(echo "scale=2; $sum / $count" | bc)
+        # avg=$(echo "scale=2; $sum / $count" | bc)
+        aavg=$(awk -v sum="$sum" -v count="$count" 'BEGIN{ printf "%.2f", (sum / count) }')
         avg_mem["$idx"]=$avg
-        total_avg=$(echo "$total_avg + $avg" | bc)
+        # total_avg=$(echo "$total_avg + $avg" | bc)
+        total_avg=$(awk -v prev="$total_avg" -v curr="$avg" 'BEGIN{ printf "%.2f", (prev + curr) }')
         ((total_count++))
     else
         avg_mem["$idx"]=0
@@ -165,7 +167,12 @@ done
 # 计算总平均值
 overall_avg=0
 if [[ $total_count -gt 0 ]]; then
-    overall_avg=$(echo "scale=2; $total_avg / $total_count" | bc)
+    # overall_avg=$(echo "scale=2; $total_avg / $total_count" | bc)
+    overall_avg=$(awk -v total_avg="$total_avg" -v total_count="$total_count" '
+                    BEGIN {
+                        avg = (total_count != 0) ? total_avg / total_count : 0.00
+                        printf "%.2f\n", avg  # 严格保持与bc相同的小数精度
+                    }')
 fi
 
 ################ 生成报告 ################
