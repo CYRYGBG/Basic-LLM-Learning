@@ -18,7 +18,7 @@ llamafactory-cli export merge_config.yaml
 
 ----------------------tensorboard相关----------------------
 ps -ef | grep tensorboard | awk '{print $2}' | xargs kill -9
-tensorboard --port 6007 --logdir D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\log_output\lora8 
+tensorboard --port 6007 --logdir D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\log_output\loraplus16 
 
 
 ----------------------评估----------------------
