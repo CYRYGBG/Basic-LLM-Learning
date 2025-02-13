@@ -10,28 +10,15 @@
 
 **本文的所有代码都放在了仓库[Basic-LLM-Learning](https://github.com/CYRYGBG/Basic-LLM-Learning)中，欢迎star！！！**
 
-# TODO
-
-- [x] 测试下现在的显存计算脚本能不能跑
-- [ ] 把所有模型的yaml文件放在一个文件夹里
-  - [ ] 做好文件命名
-  - [ ] 每个文件头标好运行命令
-
-- [ ] 找几篇综述，看下现在主要有哪些微调算法
-- [ ] 完成llama的所有算法的测试和时间计算
-- [ ] 完成Swift所有算法的测试和时间计算
-
 # 简介
 
-不同库之间支持的微调方法不同，本文主要依据[Swift](https://swift.readthedocs.io/zh-cn/stable/Instruction/%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0.html#tuner)和[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)进行学习和比较，并且在每个微调方法中贴上对应的论文链接。后文中**全部方法中与微调相关的参数均由Deepseek的建议设置，其他参数全部相同**，每个方法中的“实验”小节仅展示训练过程的曲线，最终结果在“结果对比”中进行展示。
+根据前一篇最后的结论，现在决定选取选取[Qwen/Qwen2.5-1.5B](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B)作为base model，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集完整整篇文章的实验和记录。
 
-# Full Parameter Fine-tuning（全参微调）
+本文主要依据[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)中LoRA相关的部分进行原理的学习和代码实验的比较（包括原始LoRA、LoRA+、rsLoRA、DoRA和PiSSA），并且在每个微调方法中贴上对应的论文链接。后文中**全部方法中与微调相关的参数均由Deepseek的建议设置，其他参数全部相同**，每个方法中的“实验”小节仅展示训练过程的曲线，最终结果在“结果对比”中进行展示。
 
+本文涉及到的代码都是基于[LLM基础学习03](https://zhuanlan.zhihu.com/p/22864281740)修改对应的训练配置文件实现的，所以想要跟着一起跑一遍的同学可能需要回头看一下这个。
 
-
-# Freeze
-
-
+*题外话：本来还是想测一下全参微调方面的代码的，可惜沿着之前的模型和数据集做测试的话显存不够用了。。。所以只能测一下LoRA相关的。*
 
 # LoRA
 
@@ -158,6 +145,8 @@ flash_attn: fa2
 
 ## 原理
 
+**论文链接：**[DoRA: Weight-Decomposed Low-Rank Adaptation](https://arxiv.org/abs/2402.09353)
+
 
 
 ## 参数
@@ -169,34 +158,6 @@ flash_attn: fa2
 
 
 # PiSSA
-
-## 原理
-
-
-
-## 参数
-
-
-
-## 实验
-
-
-
-# Galore
-
-## 原理
-
-
-
-## 参数
-
-
-
-## 实验
-
-
-
-# BAdam
 
 ## 原理
 
