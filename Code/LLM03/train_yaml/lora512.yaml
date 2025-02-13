@@ -5,11 +5,10 @@ model_name_or_path: D:/CYR_TMP/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模
 stage: sft
 do_train: true
 report_to: tensorboard    # Tensorboard设置
-logging_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/log_output/rslora64 
+logging_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/log_output/lora512 
 finetuning_type: lora  # lora微调
 lora_target: all
-use_rslora: true
-lora_rank: 64
+lora_rank: 512
 flash_attn: fa2
 
 
@@ -23,7 +22,7 @@ overwrite_cache: true
 preprocessing_num_workers: 8  
 
 # ------------------- 训练输出相关 -------------------
-output_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/output/rslora64 
+output_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/output/lora512 
 logging_steps: 10  # 每10步输出一次日志
 save_steps: 200  # 每100步保存一次检查点
 plot_loss: true  # 绘制训练损失曲线
