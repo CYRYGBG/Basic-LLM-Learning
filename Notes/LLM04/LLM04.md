@@ -23,9 +23,7 @@
 
 # 简介
 
-不同库之间支持的微调方法不同，本文主要依据[Swift](https://swift.readthedocs.io/zh-cn/stable/Instruction/%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0.html#tuner)和[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)进行学习和比较。
-
-
+不同库之间支持的微调方法不同，本文主要依据[Swift](https://swift.readthedocs.io/zh-cn/stable/Instruction/%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0.html#tuner)和[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)进行学习和比较，并且在每个微调方法中贴上对应的论文链接。后文中**全部方法中与微调相关的参数均由Deepseek的建议设置，其他参数全部相同**，每个方法中的“实验”小节仅展示训练过程的曲线，最终结果在“结果对比”中进行展示。
 
 # Full Parameter Fine-tuning（全参微调）
 
@@ -37,29 +35,188 @@
 
 # LoRA
 
+## 原理
 
+**论文链接：**[LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
+
+LoRA方法认为，大模型在参数微调过程中，参数的更新不是在全参数空间上进行的，而是在一个维度更低的空间中进行（即更新的参数所构成的矩阵实际上是一个低秩矩阵），所以**模型的优化可以在低维空间进行**，也就是低秩分解矩阵（一个低秩的矩阵可以分解为两个简单矩阵的乘积）中进行。另外的一个重要的优点就是，由于LoRA微调的结果是一些比较小的矩阵，在训练后使用时是直接加到原模型上，这就大大方便了细分方向任务的微调，不用每个任务都存一个巨大的模型，而是只要存一个LoRA微调的结果再叠加到原模型后就可以在细分任务中使用。
+
+现在假设一个超级简单的预训练好的模型里面有一个权重矩阵$W_0$，
+$$
+h=W_1x=W_0x+\Delta Wx=W_0x+BAx
+$$
+现在我们要基于这个权重针对具体任务进行微调，微调后的权重是$W_1$，由于$W_1$是在$W_0$的基础上梯度下降逐步更新来的，所以**整个微调过程可以视为是在原权重$W_0$上进行加加减减的操作**，我们把整个微调过程中所有的这种操作叠加记为$\Delta W$，这个实际上就是微调过程中模型学习到的东西（所谓参数的更新），那么根据前面的结论：“**模型的优化可以在低维空间进行**”，可以进一步使用两个矩阵相乘来表示这个参数更新，即$B$和$A$，可以参考论文中的图示：
+
+![image-20250213170920858](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213170920905.png)
+
+图中$W$表示原权重矩阵，$B$和$A$表示微调过程中学习到的参数，按照图中的维度，原来需要训练的参数量是$d\times d=d^2$个参数，使用矩阵分解后需要训练的参数量就是$2dr$，假如$d=64,r=8$，**最终就是$4096$和$1024$的区别**，差了四倍！而按照论文中提到的在GPT3上的训练，显存的需求直接从1.2TB变成了350GB（虽然还是很大就是了）。
+
+![image-20250213171603004](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213171603050.png)
+
+## 参数
+
+```yaml
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 8  # 16
+flash_attn: fa2
+```
+
+## 实验
+
+![image-20250213172611377](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213172611428.png)
+
+![image-20250213172705571](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213172705620.png)
 
 # LoRA+
 
+## 原理
 
+**论文链接：**[LoRA+: Efficient Low Rank Adaptation of Large Models](https://arxiv.org/abs/2402.12354)
+
+在LoRA中，矩阵$B$使用全0初始化，矩阵$A$使用随机高斯初始化（从高斯分布/正态分布中随机采样初始值）；假如有两种初始化方式如下：
+
+![image-20250213185144751](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213185144798.png)
+
+其中$\sigma_{b}, \sigma_{a}$分别表示使用高斯初始化时$B$和$A$的正态分布的方差取值。如果假设模型为以下公式的简单情况：
+$$
+f(x)=(W^*+ba^\top)x,
+$$
+$W^*\in\mathbb{R}^{1\times n}$为预训练后的模型权重，$b\in\mathbb{R},a\in \mathbb{R}^{n}$为对应的原来的矩阵$B$和$A$。基于这个假设，可以得到下面关于两个矩阵的梯度值，
+
+![image-20250213193434705](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213193434749.png)
+
+另外可以得到梯度更新前后的模型输出变化为$\Delta f_{t}$，这里标出了三个项：第一个项表示固定a或固定b时**对模型输出的产生的变化关于学习率是线性的**，而两个矩阵的参数同时参与模型更新时，**学习率对模型输出产生的变化则是平方影响的**。如果$\Delta f_{t}=\Theta(1)$，即模型变化与模型宽度无关时，则公式的三个项中至少有一个项是$\Theta(1)$的。
+
+在微调的理想情况下，我们希望第一和第二个项都是$\Theta(1)$的，否则两个矩阵中就会**有一个没有被有效更新**（相当于固定了一个矩阵，只对另一个矩阵进行的训练），也就是当第一和第二个项都是$\Theta(1)$时，两个矩阵都对模型的更新起了效果（两个矩阵都有效参与了特征学习），这在论文中被称为是“**LoRA是高效的**”。
+
+在论文的一通数学证明中，作者给出了这篇论文的第一个命题：
+
+![image-20250213195949559](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213195949622.png)
+
+这个命题的含义是：**当两个矩阵的参数按照上述提到的两个初始化方法初始化，并且学习率和模型宽度的某个次方相关时，$\Delta f_{t}$中的前两个项就无法保持$\Theta(1)$，也就是这时的“LoRA是不够高效的”**。基于这个命题，作者认为在原始的LoRA中缺少了一些关键的参数设置！！
+
+![image-20250213200958798](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213201415390.png)
+
+又是一通数学证明，论文认为**为不同的矩阵分配不同的学习率**时可以使$\Delta f_{t}$中的所有项都是$\Theta(1)$的，这就得出了这篇论文的第二个命题：**只要两个矩阵的学习率分别符合$\eta_{a}=\Theta(n^{-1})$和$\eta_{b}=\Theta(1)$时（b的学习率比a的学习率大得多），就可以使微调过程中两个矩阵都学习到有效特征。**
+
+在论文后面的部分中，可以简单理解为对上述的过程进行更加深入的分析，但是结论还是不变的。由于本文主要是对原理进行简单的介绍，所有就重复一下论文中的结论：**对两个矩阵使用同样的学习率是无法学到有效特征的，按照前面的推导设置不同的学习率比例才能使两个矩阵同时学到有效特征。**
+
+## 参数
+
+```yaml
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 8  # 16
+loraplus_lr_ratio: 10
+```
+
+## 实验
+
+这里与前面的原始LoRA对比可以看出，在相同的训练轮数中，**训练集上会有非常明显的损失值二次下降的过程，说明确实是比原始LoRA学习到了更多的特征。**
+
+![image-20250213180002359](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213180002416.png)
+
+![image-20250213180124950](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213180125003.png)
 
 # rsLoRA
+
+## 原理
+
+**论文链接：**[A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA](https://arxiv.org/abs/2312.03732)
+
+在LoRA微调中，实际上两个矩阵相乘后前面还要乘以一个缩放因子，即完整的公式为：
+$$
+W+\gamma_rBA,
+$$
+其中$\gamma_r$可以看做是关于所设置的`lora_rank`的一个函数，我们需要保证$\gamma_r$的设置是符合当前的训练的。为此，论文首先提出了一个关于**秩稳定**（rank-stabilized）的定义，即**前向传播稳定性和反向传播稳定性**（下面提到的适配器即为微调过程中的神经网络模块，也就是LoRA中的两个低秩矩阵）：
+
+- **前向传播稳定性：**如果适配器输入中的每个元素是独立同分布的，并且每个元素的m阶矩都是$\Theta_{r}(1)$，那么适配器输出的每个元素的m阶矩也保持为$\Theta_{r}(1)$
+- **反向传播稳定性：**如果损失函数对适配器输出的梯度在每个元素上为$\Theta_{r}(1)$，则损失函数对适配器输入的梯度在每个元素上也保持为$\Theta_{r}(1)$
+
+![image-20250213204413423](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213204413483.png)
+
+基于这个定义，论文证明了一个定理：在使用[前面](#LoRA+)提到的第一种初始化方法时，**当且仅当$\gamma_r$的收敛速率属于$\Theta_r(\frac1{\sqrt{r}})$时，所有适配器是秩稳定的。**
+
+![image-20250213205056153](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213205056223.png)
+
+## 参数
+
+```yaml
+finetuning_type: lora  # lora微调
+lora_target: all
+use_rslora: true
+lora_rank: 8  # 16
+flash_attn: fa2
+```
+
+## 实验
 
 
 
 # DoRA
 
+## 原理
+
+
+
+## 参数
+
+
+
+## 实验
+
 
 
 # PiSSA
+
+## 原理
+
+
+
+## 参数
+
+
+
+## 实验
 
 
 
 # Galore
 
+## 原理
+
+
+
+## 参数
+
+
+
+## 实验
+
 
 
 # BAdam
 
+## 原理
 
+
+
+## 参数
+
+
+
+## 实验
+
+
+
+# 结果对比
+
+| 微调方法  | 峰值显存(MB) | 平均显存(MB) | 最佳Step | Best Eval Loss | Final Train Loss | 训练时间 | 评测结果 |
+| :-------: | :----------: | :----------: | :------: | :------------: | :--------------: | :------: | :------: |
+|  LoRA(8)  |    24,068    |  23,577.88   |   3200   |     0.3769     |      0.3823      | 01:00:22 |          |
+| LoRA(16)  |    24,097    |  23,435.58   |   3200   |     0.3752     |      0.3692      | 00:52:54 |          |
+| LoRA+(8)  |    23,974    |  23,709.56   |   3200   |     0.3839     |      0.3495      | 01:49:26 |          |
+| LoRA+(16) |    24,114    |  23,221.32   |   3000   |     0.3695     |      0.3463      | 01:16:07 |          |
+|           |              |              |          |                |                  |          |          |
 
