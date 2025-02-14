@@ -1,0 +1,25 @@
+### model
+model_name_or_path: D:\CYR_TMP\model\Qwen2.5-1.5B
+adapter_name_or_path: D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\loraplus8\checkpoint-6724
+template: qwen
+finetuning_type: lora
+
+### export
+export_dir: D:\CYR_TMP\model\Qwen2.5-1.5B-final-loraplus8
+export_size: 1
+export_device: cpu
+export_legacy_format: false
+
+# adapter路径
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora512\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\loraplus8\checkpoint-6724
+
+
+# 模型路径
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora512
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-loraplus8
+
