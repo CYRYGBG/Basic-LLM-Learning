@@ -14,7 +14,7 @@
 
 根据前一篇最后的结论，现在决定选取选取[Qwen/Qwen2.5-1.5B](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B)作为base model，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集完整整篇文章的实验和记录。
 
-本文主要依据[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)中LoRA相关的部分进行原理的学习和代码实验的比较（包括原始LoRA、LoRA+、rsLoRA、DoRA和PiSSA），并且在每个微调方法中贴上对应的论文链接。后文中**全部方法中与微调相关的参数均由Deepseek的建议设置，其他参数全部相同**，每个方法中的“实验”小节仅展示训练过程的曲线，最终结果在“结果对比”中进行展示。
+本文主要依据[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/advanced/adapters.html#)中LoRA相关的部分进行原理的学习和代码实验的比较（包括原始LoRA、LoRA+、rsLoRA、DoRA和PiSSA），并且在每个微调方法中贴上对应的论文链接。后文中**全部方法中与微调相关的参数均由Deepseek的建议设置，其他参数全部相同**（每个方法测试lora_rank为8、16和512），每个方法中的“实验”小节仅展示训练过程的曲线，最终结果在“结果对比”中进行展示。
 
 本文涉及到的代码都是基于[LLM基础学习03](https://zhuanlan.zhihu.com/p/22864281740)修改对应的训练配置文件实现的，所以想要跟着一起跑一遍的同学可能需要回头看一下这个。
 
@@ -182,7 +182,11 @@ use_dora: true
 
 ## 实验
 
+![image-20250214171307489](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214171307612.png)
 
+![image-20250214191528350](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214191528459.png)
+
+![image-20250214234847871](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214234847962.png)
 
 # PiSSA
 
@@ -190,7 +194,11 @@ use_dora: true
 
 **论文链接：**[PiSSA: Principal Singular Values and Singular Vectors Adaptation of Large Language Models](https://arxiv.org/abs/2404.02948)
 
-[LoRA+](#LoRA+)中讨论过一次关于两个矩阵参数初始化的设置，但是重点放在了两个矩阵学习率的设置上，而PiSSA就是对两个矩阵的参数初始化方法进行了讨论。
+[LoRA+](#LoRA+)中讨论过一次关于两个矩阵参数初始化的设置，但是重点放在了两个矩阵学习率的设置上，而PiSSA就是对两个矩阵的**参数初始化方法和需要训练的部分**进行了讨论。
+
+<img src="https://gitee.com/fbanhua/figurebed/raw/master/images/20250214113112310.png" alt="image-20250214113112236" style="zoom: 67%;" />
+
+论文认为，原LoRA的初始化方法会导致训练过程中**收敛缓慢**并且导致刚开始训练时**梯度更新方向随机**，并且认为在权重更新中，主要是权重矩阵中的**主成分对权重矩阵的变化起了主要作用**，所以在训练过程中，PiSSA首先对权重矩阵进行奇异值分解（SVD），将原始的权重分为主成分部分和残差部分并基于这部分进行微调参数初始化，然后只对主成分部分使用LoRA方法进行微调。论文认为：这种方法可以**加快收敛的速度**，并且由于主成分部分包含更多的信息，所以在4-bit量化下也能保持高性能。
 
 ## 参数
 
@@ -212,10 +220,16 @@ pissa_init: true
 |   LoRA(8)   |    24,068    |  23,577.88   |   3200   |     0.3769     |      0.3825      | 01:00:22 |                  |                   |
 |  LoRA+(8)   |    23,974    |  23,709.56   |   3200   |     0.3839     |      0.3116      | 01:49:26 |                  |                   |
 |  rsLoRA(8)  |    24,084    |  23,742.89   |   3200   |     0.3761     |      0.3506      | 01:44:04 |                  |                   |
+|   DoRA(8)   |    24,072    |  23,771.78   |   3200   |     0.3767     |      0.3801      | 05:36:58 |                  |                   |
+|  PiSSA(8)   |              |              |          |                |                  |          |                  |                   |
 |  LoRA(16)   |    24,097    |  23,435.58   |   3200   |     0.3752     |      0.3582      | 00:52:54 |                  |                   |
 |  LoRA+(16)  |    24,114    |  23,221.32   |   3000   |     0.3695     |      0.2949      | 01:16:07 |                  |                   |
 | rsLoRA(16)  |    24,073    |  23,720.90   |   3200   |     0.3809     |      0.3038      | 01:35:28 |                  |                   |
+|  DoRA(16)   |    24,073    |  23,717.27   |   3200   |     0.3752     |      0.3566      | 03:28:32 |                  |                   |
+|  PiSSA(16)  |              |              |          |                |                  |          |                  |                   |
 |  LoRA(512)  |    24,040    |  23,804.91   |   200    |     0.4358     |      0.2852      | 01:16:31 |                  |                   |
 | LoRA+(512)  |    24,014    |  23,495.57   |   6742   |     0.6344     |      0.5576      | 01:16:03 |                  |                   |
 | rsLoRA(512) |    24,035    |  23,684.49   |   200    |      1.34      |      2.8987      | 01:17:45 |                  |                   |
+|  DoRA(512)  |    24,038    |  23,818.38   |   200    |     0.4366     |      0.2778      | 04:28:55 |                  |                   |
+| PiSSA(512)  |              |              |          |                |                  |          |                  |                   |
 
