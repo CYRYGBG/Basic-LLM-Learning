@@ -1,3 +1,3 @@
-bash ./train_sh/lora512.sh 
-bash ./train_sh/loraplus512.sh 
-bash ./train_sh/rslora512.sh 
+bash ./train_sh/dora8.sh 
+bash ./train_sh/dora16.sh 
+bash ./train_sh/dora512.sh 

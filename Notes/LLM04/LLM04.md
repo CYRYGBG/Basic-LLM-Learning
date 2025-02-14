@@ -151,7 +151,12 @@ flash_attn: fa2
 
 ## 参数
 
-
+```yaml
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 8
+use_dora: true
+```
 
 ## 实验
 
