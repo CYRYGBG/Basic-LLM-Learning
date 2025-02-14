@@ -55,6 +55,8 @@ flash_attn: fa2
 
 ![image-20250213172705571](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213172705620.png)
 
+![image-20250214102654304](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214102654398.png)
+
 # LoRA+
 
 ## 原理
@@ -106,6 +108,8 @@ loraplus_lr_ratio: 10
 
 ![image-20250213180124950](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213180125003.png)
 
+![image-20250214102850143](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214102850212.png)
+
 # rsLoRA
 
 ## 原理
@@ -141,13 +145,31 @@ flash_attn: fa2
 
 ![image-20250213233414608](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213233414689.png)
 
+![image-20250214102403021](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214102403121.png)
+
+![image-20250214103130680](https://gitee.com/fbanhua/figurebed/raw/master/images/20250214103130752.png)
+
+
+
 # DoRA
 
 ## 原理
 
 **论文链接：**[DoRA: Weight-Decomposed Low-Rank Adaptation](https://arxiv.org/abs/2402.09353)
 
+如果说把[LoRA+](#LoRA+)看做是把一起更新的两个矩阵分开来进行看待，那么DoRA就是把权重矩阵更新时的**更新方向和更新大小**分开来讨论。在LoRA中，微调过程需要同时关注更新大小（量级）和方向两个部分；而在DoRA中，微调过程强制**参数专注于方向方面的学习**，而量级将作为独立的可调参数。
 
+<img src="https://gitee.com/fbanhua/figurebed/raw/master/images/20250214110002340.png" alt="image-20250214105307382" style="zoom: 80%;" />
+
+对照原论文中的图如上，首先原始权重可以进行按照公式进行分解得到**量级和方向**：
+$$
+W=m\frac{V}{||V||_c}=\|W\|_c\frac{W}{||W||_c},
+$$
+也就是对预训练权重进行分解，得到原权重矩阵的**量级参数**和**方向参数**，其中量级参数将初始化为可训练参数，方向参数则使用LoRA方法进行更新：
+$$
+W'=\underline{m}\frac{V+\Delta V}{||V+\Delta V||_c}=\underline{m}\frac{W_0+\underline{BA}}{||W_0+\underline{BA}||_c},
+$$
+其中**带下划线的部分就是可训练参数**。按照这个流程进行一次训练并合并所有参数后就可以按照LoRA的方法更新一次参数。
 
 ## 参数
 
@@ -166,11 +188,18 @@ use_dora: true
 
 ## 原理
 
+**论文链接：**[PiSSA: Principal Singular Values and Singular Vectors Adaptation of Large Language Models](https://arxiv.org/abs/2404.02948)
 
+[LoRA+](#LoRA+)中讨论过一次关于两个矩阵参数初始化的设置，但是重点放在了两个矩阵学习率的设置上，而PiSSA就是对两个矩阵的参数初始化方法进行了讨论。
 
 ## 参数
 
-
+```yaml
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 8
+pissa_init: true
+```
 
 ## 实验
 
@@ -178,12 +207,15 @@ use_dora: true
 
 # 结果对比
 
-|  微调方法  | 峰值显存(MB) | 平均显存(MB) | 最佳Step | Best Eval Loss | Final Train Loss | 训练时间 | 评测结果（Best） | 评测结果（Final） |
-| :--------: | :----------: | :----------: | :------: | :------------: | :--------------: | :------: | :--------------: | :---------------: |
-|  LoRA(8)   |    24,068    |  23,577.88   |   3200   |     0.3769     |      0.3825      | 01:00:22 |                  |                   |
-|  LoRA+(8)  |    23,974    |  23,709.56   |   3200   |     0.3839     |      0.3116      | 01:49:26 |                  |                   |
-| rsLoRA(8)  |    24,084    |  23,742.89   |   3200   |     0.3761     |      0.3506      | 01:44:04 |                  |                   |
-|  LoRA(16)  |    24,097    |  23,435.58   |   3200   |     0.3752     |      0.3582      | 00:52:54 |                  |                   |
-| LoRA+(16)  |    24,114    |  23,221.32   |   3000   |     0.3695     |      0.2949      | 01:16:07 |                  |                   |
-| rsLoRA(16) |              |              |   3200   |     0.3809     |                  |          |                  |                   |
+|  微调方法   | 峰值显存(MB) | 平均显存(MB) | 最佳Step | Best Eval Loss | Final Train Loss | 训练时间 | 评测结果（Best） | 评测结果（Final） |
+| :---------: | :----------: | :----------: | :------: | :------------: | :--------------: | :------: | :--------------: | :---------------: |
+|   LoRA(8)   |    24,068    |  23,577.88   |   3200   |     0.3769     |      0.3825      | 01:00:22 |                  |                   |
+|  LoRA+(8)   |    23,974    |  23,709.56   |   3200   |     0.3839     |      0.3116      | 01:49:26 |                  |                   |
+|  rsLoRA(8)  |    24,084    |  23,742.89   |   3200   |     0.3761     |      0.3506      | 01:44:04 |                  |                   |
+|  LoRA(16)   |    24,097    |  23,435.58   |   3200   |     0.3752     |      0.3582      | 00:52:54 |                  |                   |
+|  LoRA+(16)  |    24,114    |  23,221.32   |   3000   |     0.3695     |      0.2949      | 01:16:07 |                  |                   |
+| rsLoRA(16)  |    24,073    |  23,720.90   |   3200   |     0.3809     |      0.3038      | 01:35:28 |                  |                   |
+|  LoRA(512)  |    24,040    |  23,804.91   |   200    |     0.4358     |      0.2852      | 01:16:31 |                  |                   |
+| LoRA+(512)  |    24,014    |  23,495.57   |   6742   |     0.6344     |      0.5576      | 01:16:03 |                  |                   |
+| rsLoRA(512) |    24,035    |  23,684.49   |   200    |      1.34      |      2.8987      | 01:17:45 |                  |                   |
 

@@ -1,0 +1,50 @@
+﻿# ------------------- 基础模型配置 -------------------
+model_name_or_path: D:/CYR_TMP/model/Qwen2.5-1.5B  # 使用Qwen2.5-1.5B基座模型
+
+# ------------------- 训练阶段配置 -------------------
+stage: sft
+do_train: true
+report_to: tensorboard    # Tensorboard设置
+logging_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/log_output/pissa16 
+finetuning_type: lora  # lora微调
+lora_target: all
+lora_rank: 16
+pissa_init: true
+flash_attn: fa2
+
+
+# ------------------- 数据集配置 -------------------
+dataset_dir: D:/CYR_TMP/dataset/openai___gsm8k/main/0.0.0/e53f048856ff4f594e959d75785d2c2d37b678ee
+dataset: gsm8k_math_train               # 对应JSON中定义的数据集名称
+max_samples: null  
+template: qwen  
+cutoff_len: 1024  
+overwrite_cache: true  
+preprocessing_num_workers: 8  
+
+# ------------------- 训练输出相关 -------------------
+output_dir: D:/CYR_TMP/Basic-LLM-Learning/Code/LLM03/output/pissa16 
+logging_steps: 10  # 每10步输出一次日志
+save_steps: 200  # 每100步保存一次检查点
+plot_loss: true  # 绘制训练损失曲线
+
+# ------------------- 训练超参数 -------------------
+per_device_train_batch_size: 1  
+gradient_accumulation_steps: 2             
+learning_rate: 5.0e-5                       
+num_train_epochs: 2                         
+max_grad_norm: 0.5                          
+lr_scheduler_type: cosine                   
+warmup_ratio: 0.05                          
+weight_decay: 0.01                          
+
+# ------------------- 验证与评估 -------------------
+val_size: 0.1  # 10%数据作为验证集
+per_device_eval_batch_size: 4  
+eval_strategy: steps 
+eval_steps: 200  
+
+# ------------------- 显存优化 -------------------
+gradient_checkpointing: true  
+optim: adamw_torch  
+
