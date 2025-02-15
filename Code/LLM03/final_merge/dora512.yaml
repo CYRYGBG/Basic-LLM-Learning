@@ -1,0 +1,46 @@
+### model
+model_name_or_path: D:\CYR_TMP\model\Qwen2.5-1.5B
+adapter_name_or_path: D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\dora512\checkpoint-6724
+template: qwen
+finetuning_type: lora
+
+### export
+export_dir: D:\CYR_TMP\model\Qwen2.5-1.5B-final-dora512
+export_size: 1
+export_device: gpu
+export_legacy_format: false
+
+# adapter路径
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\lora512\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\loraplus8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\loraplus16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\loraplus512\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\rslora8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\rslora16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\rslora512\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\pissa8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\pissa16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\pissa512\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\dora8\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\dora16\checkpoint-6724
+# D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\output\dora512\checkpoint-6724
+
+# 模型路径
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-lora512
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-loraplus8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-loraplus16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-loraplus512
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-rslora8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-rslora16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-rslora512
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-pissa8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-pissa16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-pissa512
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-dora8
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-dora16
+# D:\CYR_TMP\model\Qwen2.5-1.5B-final-dora512
+
