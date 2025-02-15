@@ -215,6 +215,8 @@ pissa_init: true
 
 ![image-20250215005832692](https://gitee.com/fbanhua/figurebed/raw/master/images/20250215005832781.png)
 
+![image-20250215091836802](https://gitee.com/fbanhua/figurebed/raw/master/images/20250215091836904.png)
+
 # 结果对比
 
 |  微调方法   | 峰值显存(MB) | 平均显存(MB) | Best Step | Best Eval Loss | Final Train Loss | 训练时间 | 评测结果（Best Step） | 评测结果（Final Step） |
@@ -233,5 +235,5 @@ pissa_init: true
 | LoRA+(512)  |    24,014    |  23,495.57   |   6724    |     0.6344     |      0.5576      | 01:16:03 |                       |                        |
 | rsLoRA(512) |    24,035    |  23,684.49   |    200    |      1.34      |      2.8987      | 01:17:45 |                       |                        |
 |  DoRA(512)  |    24,038    |  23,818.38   |    200    |     0.4366     |      0.2778      | 04:28:55 |                       |                        |
-| PiSSA(512)  |              |              |           |                |                  |          |                       |                        |
+| PiSSA(512)  |    24,035    |  23,641.67   |   6724    |     0.541      |      0.4067      | 01:14:30 |                       |                        |
 

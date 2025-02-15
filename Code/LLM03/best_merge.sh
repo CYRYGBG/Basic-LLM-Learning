@@ -7,4 +7,6 @@ llamafactory-cli export ./best_merge/rslora8.yaml
 llamafactory-cli export ./best_merge/rslora16.yaml
 llamafactory-cli export ./best_merge/rslora512.yaml
 llamafactory-cli export ./best_merge/pissa8.yaml
+llamafactory-cli export ./best_merge/pissa16.yaml
+llamafactory-cli export ./best_merge/pissa512.yaml
 
