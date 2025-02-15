@@ -7,7 +7,7 @@ finetuning_type: lora
 ### export
 export_dir: D:\CYR_TMP\model\Qwen2.5-1.5B-lora512
 export_size: 1
-export_device: cpu
+export_device: gpu
 export_legacy_format: false
 
 # adapter路径
