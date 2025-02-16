@@ -13,3 +13,5 @@
 [LLM基础学习02：分布式训练核心架构与多级并行策略详解——DDP/FSDP/ZeRO实战代码、显存优化方案及技术资源全景索引](https://zhuanlan.zhihu.com/p/21784954155)
 
 [LLM基础学习03：Qwen2.5-1.5B-Instruct指令微调全流程实践——LLaMA Factory框架与GSM8K评估](https://zhuanlan.zhihu.com/p/22864281740)
+
+[LLM基础学习04：LoRA变种原理与实践全解析——LoRA+/rsLoRA/DoRA/PiSSA多方法代码实验与GSM8K评估](https://zhuanlan.zhihu.com/p/24017770766)
