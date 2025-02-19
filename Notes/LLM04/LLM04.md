@@ -10,6 +10,11 @@
 
 **本文的所有代码都放在了仓库[Basic-LLM-Learning](https://github.com/CYRYGBG/Basic-LLM-Learning)中，欢迎star！！！**
 
+# 参考资料
+
+- [LoRA超参数调整实验](https://lightning.ai/pages/community/lora-insights/)
+  - 讨论了是否要将AdamW改为SGD进行训练：从显存占用的角度来看差别不会很大，但是不同的优化器的最佳学习率不同（差别还挺大），并且建议加上scheduler一起用
+
 # 简介
 
 根据前一篇最后的结论，现在决定选取选取[Qwen/Qwen2.5-1.5B](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B)作为base model，选取[GSM8K](hhttps://huggingface.co/datasets/openai/gsm8k)作为微调数据集完整整篇文章的实验和记录。
@@ -39,6 +44,10 @@ $$
 图中$W$表示原权重矩阵，$B$和$A$表示微调过程中学习到的参数，按照图中的维度，原来需要训练的参数量是$d\times d=d^2$个参数，使用矩阵分解后需要训练的参数量就是$2dr$，假如$d=64,r=8$，**最终就是$4096$和$1024$的区别**，差了四倍！而按照论文中提到的在GPT3上的训练，显存的需求直接从1.2TB变成了350GB（虽然还是很大就是了）。
 
 ![image-20250213171603004](https://gitee.com/fbanhua/figurebed/raw/master/images/20250213171603050.png)
+
+论文中还提到一个参数就是$\alpha$，这个参数在LLaMA Factory的文档中是默认不设置，**如果要设置的话则一般是`lora_alpha=lora_rank*2`**（下面的实验中没有设置该参数，但是**根据一些文章，似乎一般都要设置，并且在rank大的时候更应该设置**）。
+
+![image-20250219102842907](https://gitee.com/fbanhua/figurebed/raw/master/images/20250219102842978.png)
 
 ## 参数
 
