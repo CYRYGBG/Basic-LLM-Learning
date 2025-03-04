@@ -14,6 +14,8 @@ TRPO前的部分为学习[【王树森】深度强化学习(DRL)](https://www.bi
 
 [油管视频：[GRPO Explained] DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://www.youtube.com/watch?v=bAWV_yrqx4w)
 
+[GRPO From Scratch](https://github.com/aburkov/theLMbook/blob/main/GRPO_From_Scratch_Multi_GPU_DataParallel_Qwen_2_5_1_5B_Instruct.ipynb)
+
 ## 强化学习简要基础
 
 ### 符号解释
@@ -75,6 +77,8 @@ $$
 
 ### TRPO(信任区域策略优化)
 
+原文链接：[Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477)
+
 ![置信域算法](https://gitee.com/fbanhua/figurebed/raw/master/images/20250303102523352.png)
 
 其中$L(\mathbf{\theta}\mid\mathbf{\theta}_{\mathrm{old}})$表示对目标函数的近似，而
@@ -89,6 +93,10 @@ $$
 
 在置信域算法的基础上，可以对策略函数的目标函数做近似，然后再在参数的置信域中进行梯度更新。而计算两个参数距离的方法在视频中提到有两种：**直接计算范数和计算KL散度**（计算两个概率分布的距离）。同时由于需要对动作价值函数做近似，所以策略函数的参数在**决策过程中不会进行更新**，只有当某一局完全结束后，计算得到动作价值函数的采样之后才能计算出近似函数进行更新。
 
+**这里存在一个疑问：**，在TRPO和后续介绍的PPO算法中，都提到了需要通过某种方法计算旧模型参数和新模型参数之间的**“距离”**（也许是输出的概率分布之间的差异，也有可能直接计算两个模型的范数），**那就会产生一个问题**：在进行梯度更新之前，怎么得到新的模型参数和输出的概率分布？如果没有新的模型参数和输出的概率分布，又怎么计算出损失函数？
+
+这个问题在论文的**附录C部分**有明确的数学过程表示，**基本方法就是通过使用逼近的方法先搜索出一个梯度更新方向，然后再在这个方向上使用line search，在保证满足非线性约束的同时优化目标函数。**
+
 ### PPO(近端策略优化)
 
 **原文链接：**[Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
@@ -101,7 +109,7 @@ $$
 $$
 \hat{g}=\hat{\mathbb{E}}_t\left[\nabla_\theta\log\pi_\theta(a_t\mid s_t)\hat{A}_t\right],
 $$
-（[附上公式推导链接](https://huggingface.co/learn/deep-rl-course/unit4/pg-theorem)），其中$\pi_\theta$即为参数为$\theta$的策略函数，$\hat{A}_t$表示当前时间步$t$下的某个动作相对于平均表现的优势。而**在TRPO中**，对应的**目标函数**可以简化为
+（[附上公式推导链接](https://huggingface.co/learn/deep-rl-course/unit4/pg-theorem)），其中$\pi_\theta$即为参数为$\theta$的策略函数，$\hat{A}_t$表示**当前时间步$t$下**的**某个动作相对于平均表现的优势**。而**在TRPO中**，对应的**目标函数**可以简化为
 $$
 \underset{\theta}{\operatorname*{\mathrm{maximize}}}\quad\hat{\mathbb{E}}_t\left[\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\hat{A}_t\right],
 
@@ -132,6 +140,8 @@ $$
 ![image-20250303152900525](https://gitee.com/fbanhua/figurebed/raw/master/images/20250303152900602.png)
 
 其中$d_{targ}$即为类似前一种实现中$\epsilon$的超参数。
+
+总的来说，PPO方法就是防止模型对分数的追求过于激进，需要对它的参数更新和学习加入一定的限制。
 
 ## 关于LLM的强化学习
 
@@ -165,25 +175,49 @@ $$
 $$
 这也就是**DPO中的目标函数**，在模型的训练中，梯度下降只需要根据这个目标函数进行就可以了，直接避免了强化学习中奖励建模和策略优化等多阶段的优化过程，把模型训练**简化到只有按照目标函数来进行梯度下降一个阶段（监督学习）**。
 
-### IPO(身份偏好优化)
+### GRPO(Group Relative Policy Optimization)
 
-**原文链接**：[A General Theoretical Paradigm to Understand Learning from Human Preferences](https://arxiv.org/abs/2310.12036)
+**原文链接：**[DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300)
 
-这篇论文认为DPO对一阶近似的依赖还是十分严重，
+论文首先回顾了一下PPO的公式：
+$$
+\mathcal{J}_{P P O}(\theta)=\mathbb{E}\left[q \sim P(Q), o \sim \pi_{\theta_{o l d}}(O \mid q)\right] \frac{1}{|o|} \sum_{t=1}^{|o|} \min \left[\frac{\pi_{\theta}\left(o_{t} \mid q, o_{<t}\right)}{\pi_{\theta_{o l d}}\left(o_{t} \mid q, o_{<t}\right)} A_{t}, \operatorname{clip}\left(\frac{\pi_{\theta}\left(o_{t} \mid q, o_{<t}\right)}{\pi_{\theta_{o l d}}\left(o_{t} \mid q, o_{<t}\right)}, 1-\varepsilon, 1+\varepsilon\right) A_{t}\right],
+$$
+与前面PPO中公式的差别就是这里随机采样了很多个输出来求平均进行计算，$A_t$是广义优势估计（Generalized Advantage Estimation，**GAE**）。随后论文贴出了两个方法的对比：
+![image-20250304150819001](https://gitee.com/fbanhua/figurebed/raw/master/images/20250304150819141.png)
 
-
-
-
-
-### KTO(卡尼曼-特沃斯基优化)
-
-原文链接：
-
-
+可以看到，**GRPO中直接没有使用价值网络来对输出进行评估**（PPO一般用在actor-critic上，需要有一个价值网络来对actor的行为进行评判，value model和reward model的区别在于，reward model只是按照当前的输出来给出当前这一步的奖励，相当于来自环境的反馈，而value model需要判断这个输出**是否超过了模型应该有的平均表现**，所以前面提到，叫**优势估计**），而是当LLM模型（策略网络）输入一个$q$后，推理得到多个输出$o_1, o_2,...o_G$，然后通过reward model对每个输出计算当前输出的奖励，GRPO直接通过下面的公式代替广义估计函数：
+$$
+\hat{A}_{i, t}=\widetilde{r}_{i}=\frac{r_{i}-\operatorname{mean}(\mathbf{r})}{\operatorname{std}(\mathbf{r})},
+$$
+这样就不用构建一个巨大的value model。对应的，**GRPO认为经过监督微调后的SFT模型$\pi_{ref}$中已经具有一定的知识**，所以强化学习只是为了从中把知识“释放”出来，所以在下面目标函数的最后**增加了与SFT模型$\pi_{ref}$距离的惩罚项。**
+$$
+\begin{aligned}
+\mathcal{J}_{GRPO}(\theta) & =\operatorname{E}[q\sim P(Q),\{o_{i}\}_{i=1}^{G}\sim\pi_{\theta_{old}}(O|q)] \\
+ & \frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_{i}|}\sum_{t=1}^{|o_{i}|}\left\{\min\left[\frac{\pi_{\theta}(o_{i,t}|q,o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}|q,o_{i,<t})}\hat{A}_{i,t},\mathrm{clip}\left(\frac{\pi_{\theta}(o_{i,t}|q,o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}|q,o_{i,<t})},1-\varepsilon,1+\varepsilon\right)\hat{A}_{i,t}\right]-\beta\mathbf{D}_{KL}\left[\pi_{\theta}||\pi_{ref}\right]\right\}
+\end{aligned}
+$$
 
 ### RLHF(基于人类反馈的强化学习)
 
+这一部分主要是将强化学习怎么在LLM中发挥作用的。
+
 **提出论文**：[Learning to summarize from human feedback](https://arxiv.org/abs/2009.01325)
 
-**系统化研究**：[Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)
+**更多应用**：[Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)
 
+![image-20250304154128804](https://gitee.com/fbanhua/figurebed/raw/master/images/20250304154128963.png)
+
+上图即为PPO用于训练模型输出更符合人类喜好的结果，整个过程分三步：
+
+- 模型输出成对的结果，人工选取最佳结果
+- 从人类反馈中学习奖励模型，用于判断哪个输出的结果更好
+- 针对奖励模型优化策略函数（LLM）
+
+![image-20250304154914254](https://gitee.com/fbanhua/figurebed/raw/master/images/20250304154914422.png)
+
+在引用的第二篇论文中，训练步骤为
+
+- 人类编写一些回答来对模型进行监督微调
+- 模型输出多个结果，人类对模型输出结果的好坏进行排序，并基于该结果训练奖励模型
+- 使用奖励模型训练LLM
