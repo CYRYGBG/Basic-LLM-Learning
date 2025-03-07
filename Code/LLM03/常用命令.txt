@@ -25,6 +25,9 @@ tensorboard --port 6007 --logdir D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\log_ou
 lm_eval --model hf --model_args pretrained="D:\CYR_TMP\model\Qwen2.5-1.5B-lora8" --tasks gsm8k --device cuda --batch_size 1 --output_path ./eval_results/lora8 --num_fewshot 0
 accelerate launch -m lm_eval --model hf --model_args pretrained="/root/model/Qwen2.5-1.5B-lora8" --tasks gsm8k --batch_size 4 --output_path ./eval_results --num_fewshot 0
 
+CUDA_VISIBLE_DEVICES=5,6,7 accelerate launch -m lm_eval --model hf --model_args pretrained="/home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/models/Qwen2.5-1.5B-Instruct" --tasks gsm8k --device cuda --batch_size auto --output_path /home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/result --num_fewshot 0
+
+CUDA_VISIBLE_DEVICES=5,6,7 accelerate launch -m lm_eval --model hf --model_args pretrained="/home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/models/merged_grpo_model" --tasks gsm8k --device cuda --batch_size auto --output_path /home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/result --num_fewshot 0
 
 ----------------------显存测试----------------------
 chmod +x gpu_monitor.sh
