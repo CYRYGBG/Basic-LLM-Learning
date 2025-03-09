@@ -8,6 +8,8 @@ D:\05.Dataset\openai___gsm8k\main\0.0.0\e53f048856ff4f594e959d75785d2c2d37b678ee
 
 ----------------------模型下载----------------------
 modelscope download --model Qwen/Qwen2.5-1.5B --local_dir /root/autodl-tmp/model/Qwen2.5-1.5B
+modelscope download --model Qwen/Qwen2.5-7B-Instruct --local_dir .models/Qwen2.5-7B-Instruct
+huggingface-cli download --resume-download Qwen/Qwen2.5-7B-Instruct --local-dir ./models/Qwen2.5-7B-Instruct
 
 
 ----------------------训练----------------------
@@ -18,16 +20,13 @@ llamafactory-cli export merge_config.yaml
 
 ----------------------tensorboard相关----------------------
 ps -ef | grep tensorboard | awk '{print $2}' | xargs kill -9
-tensorboard --port 6007 --logdir D:\CYR_TMP\Basic-LLM-Learning\Code\LLM03\log_output\rslora8 
-
+tensorboard --port 6007 --logdir ./runs/dlc_1.5B_experiment
 
 ----------------------评估----------------------
 lm_eval --model hf --model_args pretrained="D:\CYR_TMP\model\Qwen2.5-1.5B-lora8" --tasks gsm8k --device cuda --batch_size 1 --output_path ./eval_results/lora8 --num_fewshot 0
 accelerate launch -m lm_eval --model hf --model_args pretrained="/root/model/Qwen2.5-1.5B-lora8" --tasks gsm8k --batch_size 4 --output_path ./eval_results --num_fewshot 0
 
-CUDA_VISIBLE_DEVICES=5,6,7 accelerate launch -m lm_eval --model hf --model_args pretrained="/home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/models/Qwen2.5-1.5B-Instruct" --tasks gsm8k --device cuda --batch_size auto --output_path /home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/result --num_fewshot 0
-
-CUDA_VISIBLE_DEVICES=5,6,7 accelerate launch -m lm_eval --model hf --model_args pretrained="/home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/models/merged_grpo_model" --tasks gsm8k --device cuda --batch_size auto --output_path /home/yeqi3/cyr/code/Basic-LLM-Learning/Code/LLM05/result --num_fewshot 0
+CUDA_VISIBLE_DEVICES=5,6,7 accelerate launch -m lm_eval --model hf --model_args pretrained="./models/Qwen2.5-1.5B-Instruct" --tasks gsm8k --device cuda --batch_size auto --output_path ./result --num_fewshot 0
 
 ----------------------显存测试----------------------
 chmod +x gpu_monitor.sh

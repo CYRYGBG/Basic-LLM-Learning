@@ -1,4 +1,6 @@
-TRPO前的部分为学习[【王树森】深度强化学习(DRL)](https://www.bilibili.com/video/BV12o4y197US?spm_id_from=333.788.videopod.episodes&vd_source=cbcc0f860e979710ca238ab1cdbe2a75)的简要笔记（基本就是**课程关键信息截图**）（[课程github](https://github.com/wangshusen/DRL)），**从PPO开始的部分才是学习原论文的笔记**。学习过程中的一些基础代码则是基于[Huggingface Deep RL Course](https://huggingface.co/learn/deep-rl-course/unit0/introduction)（本文不涉及关于强化学习具体代码的实现）。最后的DeepSeek GRPO代码则是基于开源的别人的复现整了一个低配运行版本来进行分析。
+TRPO前的部分为学习[【王树森】深度强化学习(DRL)](https://www.bilibili.com/video/BV12o4y197US?spm_id_from=333.788.videopod.episodes&vd_source=cbcc0f860e979710ca238ab1cdbe2a75)的简要笔记（基本就是**课程关键信息截图**）（[课程github](https://github.com/wangshusen/DRL)），**前面的部分都非常简要，从PPO开始的部分才是学习原论文的详细笔记**。学习过程中的一些基础代码则是基于[Huggingface Deep RL Course](https://huggingface.co/learn/deep-rl-course/unit0/introduction)（本文不涉及关于强化学习具体代码的实现）。最后的**DeepSeek GRPO代码**则是基于开源的别人的复现整了一个低配运行版本来进行分析。
+
+另外，DLC中进行了更多的实验，发现效果这个**GRPO的效果非常的好！！！**
 
 [TOC]
 
@@ -19,6 +21,8 @@ TRPO前的部分为学习[【王树森】深度强化学习(DRL)](https://www.bi
 [油管视频：[GRPO Explained] DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://www.youtube.com/watch?v=bAWV_yrqx4w)
 
 [GRPO From Scratch](https://github.com/aburkov/theLMbook/blob/main/GRPO_From_Scratch_Multi_GPU_DataParallel_Qwen_2_5_1_5B_Instruct.ipynb)
+
+[PEFT: LoRA 方法](https://hugging-face.cn/docs/peft/task_guides/lora_based_methods)
 
 ## 强化学习简要基础
 
@@ -308,7 +312,7 @@ $$
 
 这几步还是非常简单的，**即插即用**。
 
-另外，本文还调整了一些训练的超参数来防止爆内存，**右边修改后的参数可以最大化压榨3张4090的潜力**。
+另外，本文还调整了一些训练的超参数来防止爆内存。
 
 ![image-20250307225625680](https://gitee.com/fbanhua/figurebed/raw/master/images/20250307225625851.png)
 
@@ -338,8 +342,72 @@ $$
 
 ![Snipaste_2025-03-07_20-30-13](https://gitee.com/fbanhua/figurebed/raw/master/images/20250307225723119.png)
 
-可以看出，原代码的reward和魔改后的reward基本都是呈现一个**“迂回上升”**的趋势，原代码的结果可以稳定**在2到2.5之间**，而我的魔改后的版本则是**稳定在1和2之间**。推测是前面设置的`num_generations`参数比较小导致reward不高，也就是**模型实践的次数不够多**；不如原代码稳定则推测是由于使用了LoRA训练和`batch_size`设置的小导致的，**batch小了就导致每一步更新的梯度都不够稳定，而LoRA本身就会在训练中引入不稳定**。图中的loss其实就是前面的GRPO的目标函数没有加负号的结果，和原代码之间差异的原因应该和reward的差异原因一样。
+可以看出，原代码的reward和魔改后的reward基本都是呈现一个**“迂回上升”**的趋势，原代码的结果可以稳定**在2到2.5之间**，而我的魔改后的版本则是**稳定在1和2之间**。推测是前面**设置的`num_generations`参数比较小**导致reward不高，也就是**模型实践的次数不够多**；不如原代码稳定则推测是由于使用了LoRA训练和`batch_size`设置的小导致的，**batch小了就导致每一步更新的梯度都不够稳定，而LoRA本身就会在训练中引入不稳定**。图中的loss其实就是前面的GRPO的目标函数没有加负号的结果，和原代码之间差异的原因应该和reward的差异原因一样。
 
 现在直接调用原代码中的模型评估函数进行对比，可以看到是直接提高了50%的准确率！虽然**LoRA和`num_generations`引入的问题对比原代码实现的90%准确率还有差距**，但安慰下自己，也算是学习到东西了！
 
 ![image-20250307230143901](https://gitee.com/fbanhua/figurebed/raw/master/images/20250307230144062.png)
+
+### DLC1
+
+之前本系列一直用的都是[lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness)来进行评估，所以为了**比较实际上GRPO算法对模型能力的提升**，下面对原代码进行了更深入的魔改来验证GRPO的能力。
+
+前面已经推测每个样本生成回答个数的`num_generations`参数太小导致模型训练的效果不佳，所以本次训练使用了下面的参数，并且使用了4张4090进行实验。在这个参数下，训练过程中设定**只有batch_size和LoRA与原代码不同了**。
+
+![image-20250308192750243](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308192750409.png)
+
+同时为了保持与[lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness)评测时的prompt一致，分别修改了这个库的**GSM8K评测提示词为和本代码的一样**，皆为以下形式（其中要求必须有`####`是因为**该库评测时就是根据这个进行正则表达式的匹配**）：
+
+![image-20250308193038361](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308193038532.png)
+
+既然修改了格式要求，就**必须对给分方法进行修改**，所以修改为了下面的形式
+
+![image-20250308193210122](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308193210307.png)
+
+可以看到，不仅对输出中是否包含`####`进行了判断（存在则加0.2分），同时还对`</answer>`后如果还输出别的内容进行了**惩罚**，这也是为了匹配lm-evaluation-harness库评测的妥协，因为**这个库会对最后的结果进行提取**，如果模型输出太多东西就会提取错误。
+
+下面再贴上这次训练过程的指标变化和平滑后的结果：
+
+![DLC指标截图](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308195225218.png)
+
+![DLC平滑指标截图](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308195234858.png)
+
+可以看出，总的来说奖励还是在缓慢提高的！
+
+最后就是端上之前使用的`lm_eval`命令评估的结果：
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.4314 | ±    | 0.0136 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.0008 | ±    | 0.0008 |
+
+在根据之前[LLM基础学习04：LoRA变种原理与实践全解析——LoRA+/rsLoRA/DoRA/PiSSA多方法代码实验与GSM8K评估](https://zhuanlan.zhihu.com/p/24017770766)里的结果。**发现flexible-extract下的结果甚至还比原始的LoRA低几个点？？？**
+
+其实不是的，实际上，在上面设置的训练参数中，训练了一轮，一轮里最多只有500步，而一步只训练一个样本，所以实际上**只是用了500个样本来对模型进行训练**，那我们再来看看这次引用的代码中**总的训练样本数有多少个：7443个样本！！！**也就是说，仅使用了**不到十分一的样本就训练出了接近全样本训练95%以上的效果！！！**
+
+![image-20250308195733778](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308195733959.png)
+
+![20250308195430744](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309220108903.png)
+
+但是这已经要训练8个小时了，而且由于GRPO过程中有个生成句子的部分，所以也没整明白这个怎么更高效的利用显卡来完成分布式训练，下面是训练过程中的显卡占用，可以看出还是有很大的提升空间的。
+
+![GPU占用差异截图](https://gitee.com/fbanhua/figurebed/raw/master/images/20250308215021544.png)
+
+### DLC2
+
+一不做二不休，**其余细节不变**，直接用下面的配置进行一次训练，通过减少生成的数量`num_generations`来增加`batch_size`，虽然由于训练过程中是完全随机抽样，**没有保证每个样本都能抽到，但是增加了模型学习的时间和样本数量**。
+
+![image-20250309204404092](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309204404293.png)
+
+具体的代码就不贴了，这里把训练过程的reward曲线放上来。可以看出，**这次训练花了21个小时**，大部分时间都用于模型推理上，**最终的reward基本稳定在1.6到1.8之间，是DLC1的两倍**。
+
+![21小时截图](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309204609378.png)
+
+最后继续调用`lm_eval`命令获取评估效果：
+
+| Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
+| ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
+| gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.5125 | ±    | 0.0138 |
+|       |         | strict-match     |      0 | exact_match | ↑    | 0.0083 | ±    | 0.0025 |
+
+可以看出来，已经有点**边际效应**的感觉了，但同样是使用LoRA，使用GRPO微调已经比之前所有LoRA的效果要好了，证明这个在LLM上的GRPO确实是有可取之处。
