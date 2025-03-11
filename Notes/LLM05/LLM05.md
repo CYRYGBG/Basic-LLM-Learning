@@ -30,9 +30,9 @@ TRPO前的部分为学习[【王树森】深度强化学习(DRL)](https://www.bi
 
 ![符号总结](https://gitee.com/fbanhua/figurebed/raw/master/images/20250303102524283.png)
 
-- **动作价值函数：**对**当前状态$s_t$**下，**进行一个动作$a_t$后**所获得的未来return的期望值
+- **动作价值函数：**对**当前状态**$s_t$下，**进行一个动作$a_t$后**所获得的未来return的期望值
 - **状态价值函数：**当前状态下，**对所有动作的未来return计算期望值**，表示当前状态的好坏，也可以与其他策略比较得出不同策略在当前状态下的差别
-- **最优动作价值函数：**（图中没有给出），公式是$Q^\star(s_t,a_t)=\max_\pi Q_\pi(s_t,a_t)$，表示对**当前状态$s_t$**下，**进行一个动作$a_t$后**，在所有策略中可能得到的动作价值的最高值，也就是这个动作**在所有策略中可以带来的最高的平均收益**
+- **最优动作价值函数：**（图中没有给出），公式是$Q^\star(s_t,a_t)=\max_\pi Q_\pi(s_t,a_t)$，表示对**当前状态**$s_t$下，**进行一个动作**$a_t$后，在所有策略中可能得到的动作价值的最高值，也就是这个动作**在所有策略中可以带来的最高的平均收益**
 
 强化学习的基础假设有：
 
@@ -53,7 +53,7 @@ TD算法的核心是：模型**一开始**可以给出一个**最终的分数预
 
 ![策略学习](https://gitee.com/fbanhua/figurebed/raw/master/images/20250303102523153.png)
 
-策略学习的核心是**使用神经网络近似策略函数$\pi$**（$\theta$即表示神经网络中的参数），目标函数就是在使得在**当前策略函数下状态价值函数最大化**（所以这里的不是梯度下降，是梯度上升），这里的梯度计算包含两种形式，下面是关于当前状态$s_t$的状态价值函数表示：
+策略学习的核心是**使用神经网络近似策略函数**$\pi$（$\theta$即表示神经网络中的参数），目标函数就是在使得在**当前策略函数下状态价值函数最大化**（所以这里的不是梯度下降，是梯度上升），这里的梯度计算包含两种形式，下面是关于当前状态$s_t$的状态价值函数表示：
 $$
 V_\pi(s_t)=\mathbb{E}_A[Q_\pi(s_t,A)],
 $$
@@ -95,7 +95,7 @@ $$
 $$
 表示更新后的参数应该落在的区间。
 
-简要的说，就是有时需要进行梯度下降或者梯度上升的目标函数的梯度不好求，所以**就用一个近似函数在当前的$\theta_{old}$来对目标函数进行逼近后进行梯度计算**，然后因为函数的逼近在某个范围内才是误差最小的（比如对某个函数在零点处进行Taylor展开），所以就会存在一个置信域（Trust Region），需要**保证更新后的参数还落在置信域中**才是误差最小的（或者说是误差可接受的）。
+简要的说，就是有时需要进行梯度下降或者梯度上升的目标函数的梯度不好求，所以就用一个**近似函数**在当前的$\theta_{old}$来**对目标函数进行逼近后进行梯度计算**，然后因为函数的逼近在某个范围内才是误差最小的（比如对某个函数在零点处进行Taylor展开），所以就会存在一个置信域（Trust Region），需要**保证更新后的参数还落在置信域中**才是误差最小的（或者说是误差可接受的）。
 
 ![TRPO算法](https://gitee.com/fbanhua/figurebed/raw/master/images/20250303102525092.png)
 
@@ -117,7 +117,7 @@ $$
 $$
 \hat{g}=\hat{\mathbb{E}}_t\left[\nabla_\theta\log\pi_\theta(a_t\mid s_t)\hat{A}_t\right],
 $$
-（[附上公式推导链接](https://huggingface.co/learn/deep-rl-course/unit4/pg-theorem)），其中$\pi_\theta$即为参数为$\theta$的策略函数，$\hat{A}_t$表示**当前时间步$t$下**的**某个动作相对于平均表现的优势**。而**在TRPO中**，对应的**目标函数**可以简化为
+（[附上公式推导链接](https://huggingface.co/learn/deep-rl-course/unit4/pg-theorem)），其中$\pi_\theta$即为参数为$\theta$的策略函数，$\hat{A}_t$表示**当前时间步**$t$下的**某个动作相对于平均表现的优势**。而**在TRPO中**，对应的**目标函数**可以简化为
 $$
 \underset{\theta}{\operatorname*{\mathrm{maximize}}}\quad\hat{\mathbb{E}}_t\left[\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\hat{A}_t\right],
 
@@ -188,6 +188,8 @@ $$
 **原文链接：**[DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300)
 
 论文首先回顾了一下PPO的公式：
+
+![image-20250309230822195](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309230822363.png)
 $$
 \mathcal{J}_{P P O}(\theta)=\mathbb{E}\left[q \sim P(Q), o \sim \pi_{\theta_{o l d}}(O \mid q)\right] \frac{1}{|o|} \sum_{t=1}^{|o|} \min \left[\frac{\pi_{\theta}\left(o_{t} \mid q, o_{<t}\right)}{\pi_{\theta_{o l d}}\left(o_{t} \mid q, o_{<t}\right)} A_{t}, \operatorname{clip}\left(\frac{\pi_{\theta}\left(o_{t} \mid q, o_{<t}\right)}{\pi_{\theta_{o l d}}\left(o_{t} \mid q, o_{<t}\right)}, 1-\varepsilon, 1+\varepsilon\right) A_{t}\right],
 $$
@@ -198,7 +200,9 @@ $$
 $$
 \hat{A}_{i, t}=\widetilde{r}_{i}=\frac{r_{i}-\operatorname{mean}(\mathbf{r})}{\operatorname{std}(\mathbf{r})},
 $$
-这样就不用构建一个巨大的value model。对应的，**GRPO认为经过监督微调后的SFT模型$\pi_{ref}$中已经具有一定的知识**，所以强化学习只是为了从中把知识“释放”出来，所以在下面目标函数的最后**增加了与SFT模型$\pi_{ref}$距离的惩罚项。**
+这样就不用构建一个巨大的value model。对应的，GRPO认为**经过监督微调后的SFT模型**$\pi_{ref}$中已经**具有一定的知识**，所以强化学习只是为了从中把知识“释放”出来，所以在下面目标函数的最后增加了与SFT模型$\pi_{ref}$**距离的惩罚项**。
+
+![image-20250309230854052](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309230854219.png)
 $$
 \begin{aligned}
 \mathcal{J}_{GRPO}(\theta) & =\operatorname{E}[q\sim P(Q),\{o_{i}\}_{i=1}^{G}\sim\pi_{\theta_{old}}(O|q)] \\
@@ -208,7 +212,7 @@ $$
 
 ### RLHF(基于人类反馈的强化学习)
 
-这一部分主要是将强化学习怎么在LLM中发挥作用的。
+这一部分主要是讲强化学习怎么在LLM中发挥作用的。
 
 **提出论文**：[Learning to summarize from human feedback](https://arxiv.org/abs/2009.01325)
 
@@ -263,7 +267,9 @@ $$
 |      `generate_rollout_data`      | 为当前模型$\pi_{\theta}$和SFT模型$\pi_{ref}$的每个输入推理得到多个结果，即**GRPO的“Group”部分**，返回输出结果及其token概率 |
 | `combined_reward/reward_function` | 调用前面两个函数进行得分计算并汇总，在后面以`reward_function`传入`grpo_loss`函数 |
 
-这里**需要超级注意的一点就是上述提到的概率都是对数概率**，这是方便后面一些数值的计算，比如前面的目标函数公式中存在一个$\frac{\pi_{\theta}\left(o_{t} \mid q, o_{<t}\right)}{\pi_{\theta_{o l d}}\left(o_{t} \mid q, o_{<t}\right)}$，添加对数之后就可以按照下面的**推导简化计算公式**：
+这里**需要超级注意的一点就是上述提到的概率都是对数概率**，这是方便后面一些数值的计算，比如前面的目标函数公式中存在一个$\frac{\pi_{\theta}(o_{t}  q, o_{<t})}{\pi_{\theta_{o l d}}(o_{t}  q, o_{<t})}$，添加对数之后就可以按照下面的**推导简化计算公式**：
+
+![image-20250309231146944](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309231147124.png)
 $$
 \begin{align*}r_t &= \frac{\color{green}{\pi_{\theta}(o_{t}|q, o_{<t})}}{\color{blue}{\pi_{\theta_{old}}(o_{t}|q, o_{<t})}} \\&= \frac{\exp\left( \color{green}{\log \pi_{\theta}(o_{t}|q, o_{<t})} \right)}{\exp\left( \color{blue}{\log \pi_{\theta_{old}}(o_{t}|q, o_{<t})} \right)} \\&=  \exp\left( \color{green}{\log \pi_{\theta}(o_{t}|q, o_{<t})} - \color{blue}{\log \pi_{\theta_{old}}(o_{t}|q, o_{<t})} \right ).
  \end{align*}
@@ -403,11 +409,16 @@ $$
 
 ![21小时截图](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309204609378.png)
 
-最后继续调用`lm_eval`命令获取评估效果：
+为了和之前的模型对比，这里还使用原代码的测试函数在测试集中选取了前50个样本进行了一次测试：
+
+![image-20250309223604736](https://gitee.com/fbanhua/figurebed/raw/master/images/20250309223604904.png)
+
+最后则是继续调用`lm_eval`命令获取评估效果：
 
 | Tasks | Version | Filter           | n-shot | Metric      |      |  Value |      | Stderr |
 | ----- | ------: | ---------------- | -----: | ----------- | ---- | -----: | ---- | -----: |
 | gsm8k |       3 | flexible-extract |      0 | exact_match | ↑    | 0.5125 | ±    | 0.0138 |
 |       |         | strict-match     |      0 | exact_match | ↑    | 0.0083 | ±    | 0.0025 |
 
-可以看出来，已经有点**边际效应**的感觉了，但同样是使用LoRA，使用GRPO微调已经比之前所有LoRA的效果要好了，证明这个在LLM上的GRPO确实是有可取之处。
+可以看出来，在使用`lm_eval`命令得到的效果上已经有点**边际效应**的感觉了，但同样是使用LoRA，使用GRPO微调已经比之前所有LoRA的效果要好了，证明这个在LLM上的GRPO确实是有可取之处。
+

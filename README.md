@@ -15,3 +15,5 @@
 [LLM基础学习03：Qwen2.5-1.5B-Instruct指令微调全流程实践——LLaMA Factory框架与GSM8K评估](https://zhuanlan.zhihu.com/p/22864281740)
 
 [LLM基础学习04：LoRA变种原理与实践全解析——LoRA+/rsLoRA/DoRA/PiSSA多方法代码实验与GSM8K评估](https://zhuanlan.zhihu.com/p/24017770766)
+
+[LLM基础学习05：TRPO/PPO/DPO理论解析及基于GRPO训练的Qwen2.5-1.5B-Instruct在GSM8K上的效果验证](https://zhuanlan.zhihu.com/p/29046223663)
