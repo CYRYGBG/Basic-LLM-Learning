@@ -3,6 +3,11 @@
 - [ ] 弄明白`BufferCache`
 - [ ] 准确性检查（有兴趣再看）
   - [ ] 关于`effective_n_kv_heads`
+- [ ] 计算效率检查（有兴趣再看）
+  - [ ] 关于`enable_flash_sdp`
+  - [ ] 关于`enable_mem_efficient_sdp`
+  - [ ] 关于`ActivationCheckpointingStrategy.fine_grained`
+
 
 
 
@@ -18,11 +23,26 @@
 
   - `RMSLayerNorm`：按照RMSNorm的公式进行计算，$y_i=\frac{x_i}{\mathrm{RMS}(x)}*\gamma_i,\mathrm{RMS}(x)=\sqrt{\epsilon+\frac1n\sum_{i=1}^nx_i^2}$
 
+- `Activation`：父类，根据传入的参数返回对应的激活函数类
+  - `GELU`
+
+  - `ReLU`
+
+  - `SwiGLU`
+
 - `RotaryEmbedding`：现在常用的token位置编码方法[RoPE](https://spaces.ac.cn/archives/8265/comment-page-1)的实现，融合了绝对位置编码和相对位置编码
 
-- `OLMoBlock`：构成transformer模型的基本块，包含
+- `OLMoBlock`：构成transformer模型的基本块
 
-  
+
+
+|   属性    |                赋值                | 作用 |
+| :-------: | :--------------------------------: | :--: |
+| `dropout` | `Dropout(config.residual_dropout)` |      |
+| `k_norm`  |                                    |      |
+| `q_norm`  |                                    |      |
+
+
 
 ### 加速技巧？
 
